@@ -17,11 +17,10 @@ import java.time.LocalDateTime;
 @Getter @Setter
 public class GroupMembership {
     @Id
-    private GroupMembershipId groupMembershipId;
+    private GroupMembershipId id;
     private Role role;
     private LocalDateTime joinTime;
-    public GroupMembership(Role role, LocalDateTime joinTime) {
+    public GroupMembership(Role role) {
         this.role = role;
-        this.joinTime = joinTime;
     }
 }

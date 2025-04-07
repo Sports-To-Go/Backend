@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Embeddable
 @AllArgsConstructor
@@ -17,4 +18,16 @@ import java.io.Serializable;
 public class GroupMembershipId implements Serializable {
     private Long userId;
     private Long groupId;
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof GroupMembershipId mb)) return false;
+        return mb.userId.equals(this.userId) && mb.groupId.equals(this.groupId);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, groupId);
+    }
 }

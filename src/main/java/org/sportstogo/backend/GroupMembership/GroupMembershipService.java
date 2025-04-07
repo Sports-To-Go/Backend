@@ -1,13 +1,9 @@
-package org.sportstogo.backend.Group;
+package org.sportstogo.backend.GroupMembership;
 
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.sportstogo.backend.GroupMembership.GroupMembership;
-import org.sportstogo.backend.GroupMembership.GroupMembershipId;
-import org.sportstogo.backend.GroupMembership.GroupMembershipRepo;
-import org.sportstogo.backend.GroupMembership.Role;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

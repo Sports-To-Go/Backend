@@ -2,6 +2,8 @@ package org.sportstogo.backend.Group;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.sportstogo.backend.GroupMembership.GroupMembership;
+import org.sportstogo.backend.GroupMembership.GroupMembershipRepo;
 import org.sportstogo.backend.User.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class GroupService {
     private GroupRepository groupRepository;
+    private GroupMembershipRepo groupMembershipRepo;
     public List<Group> get_groups() {
         return groupRepository.findAll();
     }
@@ -31,6 +34,8 @@ public class GroupService {
         if  (!groupRepository.existsById(id)) {
             throw new IllegalArgumentException("Group with id " + id + " does not exist");
         }
+        List<GroupMembership> groupMemberships = groupMembershipRepo.findByGroupId(id);
+        groupMembershipRepo.deleteAll(groupMemberships);
         groupRepository.deleteById(id);
     }
 }

@@ -21,4 +21,8 @@ public class Group {
     private String name;
     private Long  createdBy;
     private LocalDate createdDate;
+    public Group(String name, Long createdBy) {
+        this.name = name;
+        this.createdBy = createdBy;
+    }
 }

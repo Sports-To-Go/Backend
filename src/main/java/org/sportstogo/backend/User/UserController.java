@@ -16,6 +16,7 @@ public class UserController {
     public List<User> get_users() {
         return this.userService.get_users();
     }
+
     @PostMapping
     public void register_new_user(@RequestBody User user) {
         this.userService.register_new_user(user);

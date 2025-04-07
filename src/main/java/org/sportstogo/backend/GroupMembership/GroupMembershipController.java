@@ -1,13 +1,14 @@
 package org.sportstogo.backend.GroupMembership;
 
 
-import org.sportstogo.backend.Group.GroupMembershipService;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping(path = "api/v1/groupMembership")
+@AllArgsConstructor
 public class GroupMembershipController {
     private GroupMembershipService groupMembershipService;
     @GetMapping

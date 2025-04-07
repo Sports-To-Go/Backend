@@ -1,6 +1,7 @@
 package org.sportstogo.backend.Group;
 
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ public class GroupController {
         groupService.update_group(id, name);
 
     }
+    @Transactional
     @DeleteMapping(path = "{group_id}")
     public void delete_group(@PathVariable("group_id") Long id) {
         groupService.delete_group(id);
