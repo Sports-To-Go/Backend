@@ -1,4 +1,4 @@
-package org.sportstogo.backend.GroupMembership;
+package org.sportstogo.backend.Models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

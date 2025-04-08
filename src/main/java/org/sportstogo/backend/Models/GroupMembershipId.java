@@ -1,7 +1,6 @@
-package org.sportstogo.backend.GroupMembership;
+package org.sportstogo.backend.Models;
 
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

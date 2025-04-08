@@ -1,6 +1,6 @@
-package org.sportstogo.backend.Group;
+package org.sportstogo.backend.Repository;
 
-import org.sportstogo.backend.User.User;
+import org.sportstogo.backend.Models.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface GroupRepository extends JpaRepository<Group,Long> {

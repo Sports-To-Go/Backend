@@ -1,4 +1,4 @@
-package org.sportstogo.backend.Group;
+package org.sportstogo.backend.Models;
 
 
 import jakarta.persistence.*;

@@ -1,4 +1,4 @@
-package org.sportstogo.backend.GroupMembership;
+package org.sportstogo.backend.Models;
 
 public enum Role {
     admin,

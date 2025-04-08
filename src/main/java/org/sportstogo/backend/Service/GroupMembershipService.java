@@ -1,9 +1,13 @@
-package org.sportstogo.backend.GroupMembership;
+package org.sportstogo.backend.Service;
 
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.sportstogo.backend.Models.GroupMembership;
+import org.sportstogo.backend.Models.GroupMembershipId;
+import org.sportstogo.backend.Repository.GroupMembershipRepo;
+import org.sportstogo.backend.Models.Role;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,7 +20,7 @@ import java.util.Optional;
 public class GroupMembershipService {
     private GroupMembershipRepo groupMembershipRepo;
 
-    public List<GroupMembership> get_group_memberships() {
+    public List<GroupMembership> getGroupMemberships() {
         return groupMembershipRepo.findAll();
     }
 
@@ -25,7 +29,7 @@ public class GroupMembershipService {
         groupMembershipRepo.save(groupMembership);
     }
 
-    public void update_group_membership(GroupMembershipId groupMembershipId, Role role) {
+    public void updateGroupMembership(GroupMembershipId groupMembershipId, Role role) {
             Optional<GroupMembership> groupMembership = groupMembershipRepo.findById(groupMembershipId);
             if  (groupMembership.isEmpty()) {
                 throw new IllegalArgumentException("GroupMembership not found");
@@ -33,7 +37,7 @@ public class GroupMembershipService {
             groupMembership.get().setRole(role);
     }
 
-    public void delete_group_membership(GroupMembershipId groupMembershipId) {
+    public void deleteGroupMembership(GroupMembershipId groupMembershipId) {
         groupMembershipRepo.deleteById(groupMembershipId);
     }
 }

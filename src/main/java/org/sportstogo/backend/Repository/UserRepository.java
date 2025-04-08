@@ -1,5 +1,6 @@
-package org.sportstogo.backend.User;
+package org.sportstogo.backend.Repository;
 
+import org.sportstogo.backend.Models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

@@ -1,10 +1,11 @@
-package org.sportstogo.backend.Group;
+package org.sportstogo.backend.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.sportstogo.backend.GroupMembership.GroupMembership;
-import org.sportstogo.backend.GroupMembership.GroupMembershipRepo;
-import org.sportstogo.backend.User.UserRepository;
+import org.sportstogo.backend.Models.Group;
+import org.sportstogo.backend.Repository.GroupRepository;
+import org.sportstogo.backend.Models.GroupMembership;
+import org.sportstogo.backend.Repository.GroupMembershipRepo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,14 +16,14 @@ import java.util.Optional;
 public class GroupService {
     private GroupRepository groupRepository;
     private GroupMembershipRepo groupMembershipRepo;
-    public List<Group> get_groups() {
+    public List<Group> getGroups() {
         return groupRepository.findAll();
     }
-    public void add_group(Group group) {
+    public void addGroup(Group group) {
         groupRepository.save(group);
     }
     @Transactional
-    public void update_group(Long id, String name) {
+    public void updateGroup(Long id, String name) {
         Optional<Group> group = groupRepository.findById(id);
         if (group.isEmpty()) {
             throw new IllegalArgumentException("Group with id " + id + " does not exist");
@@ -30,7 +31,7 @@ public class GroupService {
         group.get().setName(name);
     }
 
-    public void delete_group(Long id) {
+    public void deleteGroup(Long id) {
         if  (!groupRepository.existsById(id)) {
             throw new IllegalArgumentException("Group with id " + id + " does not exist");
         }

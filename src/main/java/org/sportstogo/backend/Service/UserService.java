@@ -1,9 +1,12 @@
-package org.sportstogo.backend.User;
+package org.sportstogo.backend.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.sportstogo.backend.Models.User;
+import org.sportstogo.backend.Repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -15,11 +18,11 @@ public class UserService {
 
     private UserRepository userRepository;
 
-    public List<User> get_users() {
+    public List<User> getUsers() {
         return userRepository.findAll();
     }
 
-    public void register_new_user(User user) {
+    public void registerNewUser(User user) {
         if (this.userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new IllegalStateException("Email-ul exista deja");
         } else if  (this.userRepository.findByUsername(user.getUsername()).isPresent()) {
@@ -31,19 +34,20 @@ public class UserService {
         if  (!matcher.matches()) {
             throw new IllegalStateException("Email-ul nu este valid");
         }
+        user.setDateCreated(LocalDate.now());
         userRepository.save(user);
     }
 
-    public void delete_by_id(Long id) {
+    public void deleteById(Long id) {
         userRepository.deleteById(id);
     }
     @Transactional
-    public void update_user(Long id, String email, String username) {
-        Optional<User> user_op = userRepository.findById(id);
-        if (user_op.isEmpty()) {
+    public void updateUser(Long id, String email, String username) {
+        Optional<User> userOp = userRepository.findById(id);
+        if (userOp.isEmpty()) {
             throw new IllegalStateException("User not found");
         }
-        User user = user_op.get();
+        User user = userOp.get();
         if (email != null) {
             if (this.userRepository.findByEmail(email).isPresent()) {
                 throw new IllegalStateException("Email-ul exista deja");

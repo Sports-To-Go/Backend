@@ -1,4 +1,4 @@
-package org.sportstogo.backend.User;
+package org.sportstogo.backend.Models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,6 +19,7 @@ public class User {
     private Long id;
 
     private String username;
+    @Column(unique = true, nullable = false)
     private String email;
     private LocalDate dateCreated;
     public User(String username, String email, LocalDate dateCreated) {
