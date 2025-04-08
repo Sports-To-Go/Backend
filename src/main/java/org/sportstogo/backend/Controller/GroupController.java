@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "groups")
+@RequestMapping(path = "/groups")
 @AllArgsConstructor
 public class GroupController {
     private GroupService groupService;

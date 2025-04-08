@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "groupMemberships")
+@RequestMapping(path = "/groupMemberships")
 @AllArgsConstructor
 public class GroupMembershipController {
     private GroupMembershipService groupMembershipService;

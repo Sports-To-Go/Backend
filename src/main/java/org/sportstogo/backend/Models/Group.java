@@ -18,8 +18,11 @@ public class Group {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private Long  createdBy;
+    @Column(nullable = false)
     private LocalDate createdDate;
     public Group(String name, Long createdBy) {
         this.name = name;

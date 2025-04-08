@@ -21,6 +21,7 @@ public class User {
     private String username;
     @Column(unique = true, nullable = false)
     private String email;
+    @Column(nullable = false)
     private LocalDate dateCreated;
     public User(String username, String email, LocalDate dateCreated) {
         this.username = username;
