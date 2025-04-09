@@ -1,6 +1,5 @@
 package org.sportstogo.backend.Controller;
 
-
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.Models.Group;
@@ -15,30 +14,29 @@ import java.util.List;
 @RequestMapping(path = "/groups")
 @AllArgsConstructor
 public class GroupController {
-    private GroupService groupService;
+
+    private final GroupService groupService;
+
     @GetMapping
     public List<Group> getGroups() {
         return groupService.getGroups();
     }
+
     @PostMapping
-    public ResponseEntity<String> addGroups(@RequestBody Group group) {
+    public ResponseEntity<?> addGroups(@RequestBody Group group) {
         group.setCreatedDate(LocalDate.now());
-        groupService.addGroup(group);
-        return ResponseEntity.ok()
-                .body("Group added successful");
+        return groupService.addGroup(group);
     }
+
     @PutMapping(path = "{group_id}")
-    public ResponseEntity<String> updateGroup(@PathVariable("group_id") Long id,
-                             @RequestParam(required = true) String name) {
-        groupService.updateGroup(id, name);
-        return ResponseEntity.ok()
-                .body("Group updated successful");
+    public ResponseEntity<?> updateGroup(@PathVariable("group_id") Long id,
+                                         @RequestParam String name) {
+        return groupService.updateGroup(id, name);
     }
+
     @Transactional
     @DeleteMapping(path = "{group_id}")
-    public ResponseEntity<String> deleteGroup(@PathVariable("group_id") Long id) {
-        groupService.deleteGroup(id);
-        return ResponseEntity.ok()
-                .body("Group deleted successful");
+    public ResponseEntity<?> deleteGroup(@PathVariable("group_id") Long id) {
+        return groupService.deleteGroup(id);
     }
 }

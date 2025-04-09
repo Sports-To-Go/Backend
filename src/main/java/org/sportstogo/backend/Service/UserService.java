@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.Models.User;
 import org.sportstogo.backend.Repository.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,55 +18,69 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 public class UserService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public List<User> getUsers() {
         return userRepository.findAll();
     }
 
-    public void registerNewUser(User user) {
+    public ResponseEntity<?> registerNewUser(User user) {
         if (this.userRepository.findByEmail(user.getEmail()).isPresent()) {
-            throw new IllegalStateException("Email-ul exista deja");
-        } else if  (this.userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new IllegalStateException("Username-ul exista deja");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
+        } else if (this.userRepository.findByUsername(user.getUsername()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists");
         }
+
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
         Pattern pattern = Pattern.compile(emailRegex);
         Matcher matcher = pattern.matcher(user.getEmail());
-        if  (!matcher.matches()) {
-            throw new IllegalStateException("Email-ul nu este valid");
+        if (!matcher.matches()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email format");
         }
+
         user.setDateCreated(LocalDate.now());
         userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body("User successfully registered");
     }
 
-    public void deleteById(Long id) {
+    public ResponseEntity<?> deleteById(Long id) {
+        if (!userRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
         userRepository.deleteById(id);
+        return ResponseEntity.ok("User successfully deleted");
     }
+
     @Transactional
-    public void updateUser(Long id, String email, String username) {
+    public ResponseEntity<?> updateUser(Long id, String email, String username) {
         Optional<User> userOp = userRepository.findById(id);
         if (userOp.isEmpty()) {
-            throw new IllegalStateException("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
         User user = userOp.get();
+
         if (email != null) {
             if (this.userRepository.findByEmail(email).isPresent()) {
-                throw new IllegalStateException("Email-ul exista deja");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Email already exists");
             }
+
             String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
             Pattern pattern = Pattern.compile(emailRegex);
-            Matcher matcher = pattern.matcher(user.getEmail());
-            if  (!matcher.matches()) {
-                throw new IllegalStateException("Email-ul nu este valid");
+            Matcher matcher = pattern.matcher(email);
+            if (!matcher.matches()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid email format");
             }
+
             user.setEmail(email);
         }
+
         if (username != null) {
-            if  (this.userRepository.findByUsername(username).isPresent()) {
-                throw new IllegalStateException("Username-ul exista deja");
+            if (this.userRepository.findByUsername(username).isPresent()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists");
             }
             user.setUsername(username);
         }
+
+        return ResponseEntity.ok("User successfully updated");
     }
 }

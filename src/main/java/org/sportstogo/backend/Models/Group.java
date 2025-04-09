@@ -21,11 +21,5 @@ public class Group {
     @Column(nullable = false)
     private String name;
     @Column(nullable = false)
-    private Long  createdBy;
-    @Column(nullable = false)
     private LocalDate createdDate;
-    public Group(String name, Long createdBy) {
-        this.name = name;
-        this.createdBy = createdBy;
-    }
 }
