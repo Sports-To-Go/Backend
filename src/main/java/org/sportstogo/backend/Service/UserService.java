@@ -67,4 +67,11 @@ public class UserService {
             user.setUsername(username);
         }
     }
+
+    public List<User> getUsersRegisteredLastWeek() {
+        LocalDate oneWeekAgo = LocalDate.now().minusDays(7);
+        return userRepository.findUsersRegisteredAfter(oneWeekAgo);
+    }
+
+
 }

@@ -40,4 +40,9 @@ public class UserController {
         return ResponseEntity.ok()
                 .body("User updated successfully");
     }
+    @GetMapping(path = "recent")
+    public List<User> getRecentUsers() {
+        return this.userService.getUsersRegisteredLastWeek();
+    }
+
 }
