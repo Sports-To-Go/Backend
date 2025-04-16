@@ -1,6 +1,5 @@
 package org.sportstogo.backend.Service;
 
-
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.Models.GroupJoinRequest;
 import org.sportstogo.backend.Repository.GroupJoinRequestRepo;
@@ -16,35 +15,57 @@ import java.time.LocalDateTime;
 @Service
 @AllArgsConstructor
 public class GroupJoinRequestService {
-    private GroupJoinRequestRepo groupJoinRequestRepo;
-    private GroupRepository groupRepository;
-    private UserRepository userRepository;
+
+    private final GroupJoinRequestRepo groupJoinRequestRepo;
+    private final GroupRepository groupRepository;
+    private final UserRepository userRepository;
+
+    /**
+     * Retrieve a group join request by its ID.
+     *
+     * @param groupMembershipId the ID of the group join request
+     * @return response with the group join request
+     */
     public ResponseEntity<GroupJoinRequest> getGroupJoinRequestById(GroupMembershipId groupMembershipId) {
-        var x = groupJoinRequestRepo.findById(groupMembershipId);
-        if (x.isEmpty()) return ResponseEntity.notFound().build();
-        else return ResponseEntity.ok().body(x.get());
+        var request = groupJoinRequestRepo.findById(groupMembershipId);
+        return request.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
+    /**
+     * Delete a group join request by its ID.
+     *
+     * @param groupMembershipId the ID of the group join request
+     * @return response indicating success or failure
+     */
     public ResponseEntity<?> deleteGroupJoinRequestById(GroupMembershipId groupMembershipId) {
         if (!groupJoinRequestRepo.existsById(groupMembershipId)) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group Join Request not found");
         }
         groupJoinRequestRepo.deleteById(groupMembershipId);
-        return ResponseEntity.ok()
-                .body("GroupJoinRequest has been deleted");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Group Join Request has been deleted");
     }
 
+    /**
+     * Add a new group join request.
+     *
+     * @param groupJoinRequest the group join request to add
+     * @return response indicating the result of the operation
+     */
     public ResponseEntity<?> addGroupJoinRequest(GroupJoinRequest groupJoinRequest) {
-
-        if (groupJoinRequest.getRequestDateTime() == null){
+        if (groupJoinRequest.getRequestDateTime() == null) {
             groupJoinRequest.setRequestDateTime(LocalDateTime.now());
         }
+
         if (!userRepository.existsById(groupJoinRequest.getUserId())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        } else if (!groupRepository.existsById(groupJoinRequest.getGroupId())) {
+        }
+
+        if (!groupRepository.existsById(groupJoinRequest.getGroupId())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group not found");
         }
+
         groupJoinRequestRepo.save(groupJoinRequest);
-        return  ResponseEntity.ok().body("GroupJoinRequest has been added");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Group Join Request has been successfully added");
     }
 }
