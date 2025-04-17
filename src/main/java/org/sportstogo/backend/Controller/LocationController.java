@@ -30,6 +30,7 @@ public class LocationController {
      * @return appropriate HTTP status code
      */
     @PostMapping
+
     public ResponseEntity<String> addLocation(@RequestBody Location location) {
         return locationService.addNewLocation(location);
     }
