@@ -15,9 +15,4 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     @Query("Select u from User u where u.username=?1")
     Optional<User> findByUsername(String username);
-
-    @Query("Select u from User u where u.dateCreated >= ?1")
-    List<User> findUsersRegisteredAfter(java.time.LocalDate date);
-
-
 }
