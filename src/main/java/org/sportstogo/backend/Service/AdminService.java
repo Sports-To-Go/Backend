@@ -19,4 +19,12 @@ public class AdminService {
         LocalDate oneWeekAgo = LocalDate.now().minusDays(7);
         return adminRepository.findUsersRegisteredAfter(oneWeekAgo);
     }
+
+    public long getLocationCount() {
+        return adminRepository.countAllLocations();
+    }
+
+    public long getReservationCount() {
+        return adminRepository.countReservations();
+    }
 }

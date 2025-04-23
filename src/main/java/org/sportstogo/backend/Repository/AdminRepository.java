@@ -10,4 +10,10 @@ public interface AdminRepository extends JpaRepository<User,Long> {
 
     @Query("Select u from User u where u.dateCreated >= ?1")
     List<User> findUsersRegisteredAfter(java.time.LocalDate date);
+
+    @Query("SELECT COUNT(l) FROM Location l")
+    long countAllLocations();
+
+    @Query("SELECT COUNT(r) FROM Reservation r")
+    long countReservations();
 }

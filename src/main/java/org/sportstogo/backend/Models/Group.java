@@ -20,7 +20,7 @@ public class Group {
     private Long id;
     @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Long  createdBy;
     @Column(nullable = false)
     private LocalDate createdDate;

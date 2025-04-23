@@ -2,6 +2,7 @@ package org.sportstogo.backend.Controller;
 
 import org.sportstogo.backend.Models.User;
 import org.sportstogo.backend.Service.AdminService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,5 +20,16 @@ public class AdminController {
     @GetMapping(path = "recent-users")
     public List<User> getRecentUsers() {
         return this.adminService.getUsersRegisteredLastWeek();
+    }
+
+    @GetMapping("/locations/count")
+    public ResponseEntity<Long> getLocationCount() {
+        return ResponseEntity.ok(adminService.getLocationCount());
+    }
+
+    @GetMapping("/reservations/count")
+    public ResponseEntity<Long> getReservationCount() {
+        long count = adminService.getReservationCount();
+        return ResponseEntity.ok(count);
     }
 }
