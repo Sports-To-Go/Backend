@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.Models.Reservation;
 import org.sportstogo.backend.Repository.ReservationRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,15 +20,16 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public void addReservation(Reservation reservation) {
+    public ResponseEntity<String> addReservation(Reservation reservation) {
         reservationRepository.save(reservation);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Reservation has been added");
     }
 
     @Transactional
-    public void updateReservation(Long id, Reservation updatedReservation) {
+    public ResponseEntity<String> updateReservation(Long id, Reservation updatedReservation) {
         Optional<Reservation> reservation = reservationRepository.findById(id);
         if (reservation.isEmpty()) {
-            throw new IllegalArgumentException("Reservation with id " + id + " does not exist");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Reservation with id " + id + " does not exist");
         }
         Reservation existingReservation = reservation.get();
         existingReservation.setLocationId(updatedReservation.getLocationId());
@@ -37,12 +40,14 @@ public class ReservationService {
         existingReservation.setEndTime(updatedReservation.getEndTime());
         existingReservation.setTotalCost(updatedReservation.getTotalCost());
         existingReservation.setPaymentStatus(updatedReservation.getPaymentStatus());
+        return ResponseEntity.status(HttpStatus.OK).body("Reservation has been updated");
     }
 
-    public void deleteReservation(Long id) {
+    public ResponseEntity<String> deleteReservation(Long id) {
         if (!reservationRepository.existsById(id)) {
-            throw new IllegalArgumentException("Reservation with id " + id + " does not exist");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Reservation with id " + id + " does not exist");
         }
         reservationRepository.deleteById(id);
+        return ResponseEntity.status(HttpStatus.OK).body("Reservation has been deleted");
     }
 }

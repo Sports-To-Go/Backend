@@ -4,6 +4,8 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.Models.LocationRating;
 import org.sportstogo.backend.Repository.LocationRatingRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,35 +22,37 @@ public class LocationRatingService {
         return locationRatingRepository.findAll();
     }
 
-    public void addNewRating(LocationRating rating) {
+    public ResponseEntity<String> addNewRating(LocationRating rating) {
         if (rating.getScore() < 0 || rating.getScore() > 5) {
-            throw new IllegalStateException("Score should be between 0 and 5");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Score should be between 0 and 5");
         }
         if (rating.getCreatedAt() == null) {
             rating.setCreatedAt(LocalDate.now());
         }
         locationRatingRepository.save(rating);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Rating has been added");
     }
 
-    public void deleteById(Long id) {
+    public ResponseEntity<String> deleteById(Long id) {
         if (!locationRatingRepository.existsById(id)) {
-            throw new IllegalStateException("The rating with this id " + id + " does not exist");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("The rating with this id " + id + " does not exist");
         }
         locationRatingRepository.deleteById(id);
+        return ResponseEntity.status(HttpStatus.OK).body("Rating has been deleted");
     }
 
     @Transactional
-    public void updateRating(Long id, Double score, String comment) {
+    public ResponseEntity<String> updateRating(Long id, Double score, String comment) {
         Optional<LocationRating> optionalRating = locationRatingRepository.findById(id);
         if (optionalRating.isEmpty()) {
-            throw new IllegalStateException("The rating is not found");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("The rating is not found");
         }
 
         LocationRating rating = optionalRating.get();
 
         if (score != null) {
             if (score < 0 || score > 5) {
-                throw new IllegalStateException("The score should be between 0 and 5");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("The score should be between 0 and 5");
             }
             rating.setScore(score);
         }
@@ -56,5 +60,6 @@ public class LocationRatingService {
         if (comment != null && !comment.isBlank()) {
             rating.setComment(comment);
         }
+        return ResponseEntity.status(HttpStatus.OK).body("Rating has been updated");
     }
 }
