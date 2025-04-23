@@ -27,4 +27,10 @@ public class AdminService {
     public long getReservationCount() {
         return adminRepository.countReservations();
     }
+
+    public long getNumberOfUsersRegisteredInLastWeek() {
+        LocalDate oneWeekAgo = LocalDate.now().minusWeeks(1);
+        return adminRepository.countUsersRegisteredAfter(oneWeekAgo);
+    }
+
 }

@@ -3,7 +3,9 @@ package org.sportstogo.backend.Repository;
 import org.sportstogo.backend.Models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface AdminRepository extends JpaRepository<User,Long> {
@@ -16,4 +18,8 @@ public interface AdminRepository extends JpaRepository<User,Long> {
 
     @Query("SELECT COUNT(r) FROM Reservation r")
     long countReservations();
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.dateCreated >= :date")
+    long countUsersRegisteredAfter(@Param("date") LocalDate date);
+
 }

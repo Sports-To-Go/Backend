@@ -32,4 +32,9 @@ public class AdminController {
         long count = adminService.getReservationCount();
         return ResponseEntity.ok(count);
     }
+
+    @GetMapping("/recent-users/count")
+    public long getUsersRegisteredLastWeekCount() {
+        return adminService.getNumberOfUsersRegisteredInLastWeek();
+    }
 }
