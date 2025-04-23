@@ -8,13 +8,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+/**
+ * REST Controller for managing Reservation entities
+ * Provides endpoints for CRUD operations on reservations
+ */
 @RestController
 @RequestMapping(path = "/reservations")
 @AllArgsConstructor
 public class ReservationController {
     private ReservationService reservationService;
 
+    /**
+     * @return a list of all reservations
+     */
     @GetMapping
     public List<Reservation> getReservations() {
         return reservationService.getReservations();
@@ -22,24 +28,18 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<String> addReservation(@RequestBody Reservation reservation) {
-        reservationService.addReservation(reservation);
-        return ResponseEntity.ok()
-                .body("Reservation added successfully");
+        return reservationService.addReservation(reservation);
     }
 
     @PutMapping(path = "{reservation_id}")
     public ResponseEntity<String> updateReservation(@PathVariable("reservation_id") Long id,
                                                     @RequestBody Reservation reservation) {
-        reservationService.updateReservation(id, reservation);
-        return ResponseEntity.ok()
-                .body("Reservation updated successfully");
+        return reservationService.updateReservation(id, reservation);
     }
 
     @Transactional
     @DeleteMapping(path = "{reservation_id}")
     public ResponseEntity<String> deleteReservation(@PathVariable("reservation_id") Long id) {
-        reservationService.deleteReservation(id);
-        return ResponseEntity.ok()
-                .body("Reservation deleted successfully");
+        return reservationService.deleteReservation(id);
     }
 }

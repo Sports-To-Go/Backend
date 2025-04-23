@@ -6,7 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+/**
+ * REST Controller for managing LocationRating entities
+ * Provides endpoints for CRUD operations on location ratings
+ */
 @RestController
 @RequestMapping(path = "/location-ratings")
 public class LocationRatingController {
@@ -16,7 +19,9 @@ public class LocationRatingController {
     public LocationRatingController(LocationRatingService locationRatingService) {
         this.locationRatingService = locationRatingService;
     }
-
+    /**
+     * @return a list of all location ratings
+     */
     @GetMapping
     public List<LocationRating> getAllRatings() {
         return locationRatingService.getAllRatings();
@@ -24,16 +29,12 @@ public class LocationRatingController {
 
     @PostMapping
     public ResponseEntity<String> addNewRating(@RequestBody LocationRating rating) {
-        locationRatingService.addNewRating(rating);
-        return ResponseEntity.ok()
-                .body("The rating was successfully added");
+        return locationRatingService.addNewRating(rating);
     }
 
     @DeleteMapping(path = "{rating_id}")
     public ResponseEntity<String> deleteRating(@PathVariable("rating_id") Long id) {
-        locationRatingService.deleteById(id);
-        return ResponseEntity.ok()
-                .body("The rating was successfully deleted");
+        return locationRatingService.deleteById(id);
     }
 
     @PutMapping(path = "{rating_id}")
@@ -41,9 +42,6 @@ public class LocationRatingController {
             @PathVariable("rating_id") Long id,
             @RequestParam(required = false) Double score,
             @RequestParam(required = false) String comment) {
-
-        locationRatingService.updateRating(id, score, comment);
-        return ResponseEntity.ok()
-                .body("The rating was successfully updated");
+        return locationRatingService.updateRating(id, score, comment);
     }
 }
