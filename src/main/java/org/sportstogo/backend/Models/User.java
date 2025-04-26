@@ -10,7 +10,5 @@ import lombok.Setter;
 @Getter @Setter
 public class User {
     @Id private String uid;
-
-    @Column(nullable = true)
     private String description;
 }
