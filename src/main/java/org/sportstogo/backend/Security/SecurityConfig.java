@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .csrf(CsrfConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/users/private/**").authenticated()
+                        .requestMatchers("/users/profile/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(firebaseFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
