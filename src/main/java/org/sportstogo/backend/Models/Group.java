@@ -33,9 +33,12 @@ public class Group {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = true)
+    private Long  createdBy;
     /**
      * The date when the group was created. Cannot be null.
      */
+  
     @Column(nullable = false)
     private LocalDate createdDate;
 }
