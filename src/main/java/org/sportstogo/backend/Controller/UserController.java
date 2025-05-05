@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final FirebaseTokenService firebaseTokenService;
 
     @GetMapping(path="/profile")
     public ResponseEntity<User> getCurrentUser(Authentication authentication) {
@@ -28,6 +27,7 @@ public class UserController {
     public ResponseEntity<User> createUser(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         User createdUser = userService.createUser(uid);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 }
