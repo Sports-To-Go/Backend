@@ -1,6 +1,8 @@
 package org.sportstogo.backend.Repository;
 
 import org.sportstogo.backend.Models.User;
+import org.sportstogo.backend.Models.Revenue;
+import org.sportstogo.backend.Models.Revenue.PeriodType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -8,10 +10,16 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface AdminRepository extends JpaRepository<User,Long> {
+public interface AdminRepository extends JpaRepository<User, String> {
 
-    @Query("Select u from User u where u.dateCreated >= ?1")
-    List<User> findUsersRegisteredAfter(java.time.LocalDate date);
+
+    @Query(
+            value = "SELECT u.uid, u.description " +
+                    "FROM users u " +
+                    "WHERE u.date_created >= :date",
+            nativeQuery = true
+    )
+    List<User> findUsersRegisteredAfterNative(@Param("date") LocalDate date);
 
     @Query("SELECT COUNT(l) FROM Location l")
     long countAllLocations();
@@ -19,7 +27,26 @@ public interface AdminRepository extends JpaRepository<User,Long> {
     @Query("SELECT COUNT(r) FROM Reservation r")
     long countReservations();
 
-    @Query("SELECT COUNT(u) FROM User u WHERE u.dateCreated >= :date")
-    long countUsersRegisteredAfter(@Param("date") LocalDate date);
+    @Query(
+            value = "SELECT COUNT(*) " +
+                    "FROM users u " +
+                    "WHERE u.date_created >= :date",
+            nativeQuery = true
+    )
+    long countUsersRegisteredAfterNative(@Param("date") LocalDate date);
 
+
+
+    @Query("""
+      SELECT r 
+      FROM Revenue r
+      WHERE r.periodType = :type
+        AND r.periodStart BETWEEN :from AND :to
+      ORDER BY r.periodStart
+      """)
+    List<Revenue> findRevenueByPeriodTypeAndPeriodStartBetween(
+            @Param("type") PeriodType type,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to
+    );
 }
