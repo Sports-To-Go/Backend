@@ -29,7 +29,6 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String idToken = authorizationHeader.substring(7); // Remove "Bearer "
-            System.out.println("Received token: " + idToken);
 
             try {
                 String uid = firebaseTokenService.verifyTokenAndGetUid(idToken);

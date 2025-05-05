@@ -9,6 +9,9 @@ import lombok.Setter;
 @Table(name="Users")
 @Getter @Setter
 public class User {
-    @Id private String uid;
+    @Id
+    @Column(nullable=false, unique=true)
+    private String uid;
     private String description;
+    private boolean isAdmin = false;
 }
