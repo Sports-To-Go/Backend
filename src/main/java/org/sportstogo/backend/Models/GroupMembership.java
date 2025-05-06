@@ -6,43 +6,36 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.sportstogo.backend.Enums.Role;
-import org.sportstogo.backend.idModels.GroupMembershipId;
+import org.sportstogo.backend.idModels.GroupMemberID;
 
 import java.time.LocalDateTime;
 
-/**
- * Entity representing a membership of a user in a group.
- * Uses a composite primary key of userId and groupId.
- */
+
 @Entity
-@Table
+@Table(name = "group_memberships")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter @Setter
-@IdClass(GroupMembershipId.class)
+@IdClass(GroupMemberID.class)
 public class GroupMembership {
-
-    /**
-     * The ID of the user in the membership (composite key part 1).
-     */
     @Id
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false)
+    private Group groupID;
 
-    /**
-     * The ID of the group in the membership (composite key part 2).
-     */
     @Id
-    private Long groupId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "uid", nullable = false)
+    private User userID;
 
-    /**
-     * The role of the user within the group (e.g., MEMBER, ADMIN).
-     */
     @Column(nullable = false)
-    private Role role;
+    private Role role = Role.member;
 
-    /**
-     * The timestamp of when the user joined the group.
-     */
     @Column(nullable = false)
     private LocalDateTime joinTime;
+
+    @PrePersist
+    protected void onCreate() {
+        this.joinTime = LocalDateTime.now();
+    }
 }

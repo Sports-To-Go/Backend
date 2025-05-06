@@ -2,7 +2,7 @@
 //
 //import lombok.AllArgsConstructor;
 //import org.sportstogo.backend.Models.GroupMembership;
-//import org.sportstogo.backend.idModels.GroupMembershipId;
+//import org.sportstogo.backend.idModels.GroupMemberID;
 //import org.sportstogo.backend.Enums.Role;
 //import org.sportstogo.backend.Repository.GroupMembershipRepo;
 //import org.sportstogo.backend.Repository.GroupRepository;
@@ -65,7 +65,7 @@
 //     * @param role the new role to assign to the user in the group
 //     * @return a response entity indicating the result of the operation
 //     */
-//    public ResponseEntity<?> updateGroupMembership(GroupMembershipId groupMembershipId, Role role) {
+//    public ResponseEntity<?> updateGroupMembership(GroupMemberID groupMembershipId, Role role) {
 //        Optional<GroupMembership> groupMembership = groupMembershipRepo.findById(groupMembershipId);
 //        if (groupMembership.isEmpty()) {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group membership not found");
@@ -81,7 +81,7 @@
 //     * @param groupMembershipId the composite ID of the group membership to be deleted (userId + groupId)
 //     * @return a response entity indicating the result of the operation
 //     */
-//    public ResponseEntity<?> deleteGroupMembership(GroupMembershipId groupMembershipId) {
+//    public ResponseEntity<?> deleteGroupMembership(GroupMemberID groupMembershipId) {
 //        if (!groupMembershipRepo.existsById(groupMembershipId)) {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group membership not found");
 //        }

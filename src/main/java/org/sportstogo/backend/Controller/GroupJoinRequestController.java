@@ -3,7 +3,7 @@
 //import lombok.AllArgsConstructor;
 //import org.sportstogo.backend.Models.GroupJoinRequest;
 //import org.sportstogo.backend.Service.GroupJoinRequestService;
-//import org.sportstogo.backend.idModels.GroupMembershipId;
+//import org.sportstogo.backend.idModels.GroupMemberID;
 //import org.springframework.http.ResponseEntity;
 //import org.springframework.web.bind.annotation.*;
 //
@@ -27,7 +27,7 @@
 //    @GetMapping("/{userId}/{groupId}")
 //    public ResponseEntity<GroupJoinRequest> getGroupJoinRequestById(
 //            @PathVariable Long userId, @PathVariable Long groupId) {
-//        GroupMembershipId groupMembershipId = new GroupMembershipId(userId, groupId);
+//        GroupMemberID groupMembershipId = new GroupMemberID(userId, groupId);
 //        return groupJoinRequestService.getGroupJoinRequestById(groupMembershipId);
 //    }
 //
@@ -41,7 +41,7 @@
 //    @DeleteMapping("/{userId}/{groupId}")
 //    public ResponseEntity<?> deleteGroupJoinRequestById(
 //            @PathVariable Long userId, @PathVariable Long groupId) {
-//        GroupMembershipId groupMembershipId = new GroupMembershipId(userId, groupId);
+//        GroupMemberID groupMembershipId = new GroupMemberID(userId, groupId);
 //        return groupJoinRequestService.deleteGroupJoinRequestById(groupMembershipId);
 //    }
 //

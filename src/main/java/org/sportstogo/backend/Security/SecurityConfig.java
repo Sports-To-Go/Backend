@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/users/profile/**").authenticated()
+                        .requestMatchers("/social/**").authenticated()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(firebaseFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
@@ -40,7 +41,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Allow the frontend origin
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allow HTTP methods
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE")); // Allow HTTP methods
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Allow necessary headers
         configuration.setExposedHeaders(List.of("Authorization")); // Expose headers for client use
         configuration.setAllowCredentials(true); // Allow cookies or credentials if needed

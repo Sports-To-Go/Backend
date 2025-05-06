@@ -12,7 +12,7 @@ public class FirebaseTokenService {
             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
             return decodedToken.getUid();
         } catch (Exception e) {
-            throw new RuntimeException("Invalid Firebase ID token");
+            throw new RuntimeException("Invalid Firebase ID token: " + e.getMessage());
         }
     }
 }

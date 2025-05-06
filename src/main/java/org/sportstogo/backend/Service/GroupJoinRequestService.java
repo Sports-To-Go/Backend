@@ -5,7 +5,7 @@
 //import org.sportstogo.backend.Repository.GroupJoinRequestRepo;
 //import org.sportstogo.backend.Repository.GroupRepository;
 //import org.sportstogo.backend.Repository.UserRepository;
-//import org.sportstogo.backend.idModels.GroupMembershipId;
+//import org.sportstogo.backend.idModels.GroupMemberID;
 //import org.springframework.http.HttpStatus;
 //import org.springframework.http.ResponseEntity;
 //import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@
 //     * @param groupMembershipId the ID of the group join request
 //     * @return response with the group join request
 //     */
-//    public ResponseEntity<GroupJoinRequest> getGroupJoinRequestById(GroupMembershipId groupMembershipId) {
+//    public ResponseEntity<GroupJoinRequest> getGroupJoinRequestById(GroupMemberID groupMembershipId) {
 //        var request = groupJoinRequestRepo.findById(groupMembershipId);
 //        return request.map(ResponseEntity::ok)
 //                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
@@ -38,7 +38,7 @@
 //     * @param groupMembershipId the ID of the group join request
 //     * @return response indicating success or failure
 //     */
-//    public ResponseEntity<?> deleteGroupJoinRequestById(GroupMembershipId groupMembershipId) {
+//    public ResponseEntity<?> deleteGroupJoinRequestById(GroupMemberID groupMembershipId) {
 //        if (!groupJoinRequestRepo.existsById(groupMembershipId)) {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Group Join Request not found");
 //        }

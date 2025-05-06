@@ -7,11 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Collection;
 
-/**
- * Entity representing a user-defined group within the system.
- * A group has a unique ID, a name, and a creation date.
- */
 @Entity
 @Table(name = "groups")
 @AllArgsConstructor
@@ -19,26 +16,22 @@ import java.time.LocalDate;
 @Setter
 @Getter
 public class Group {
-
-    /**
-     * Unique identifier for the group. Auto-generated.
-     */
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    /**
-     * Name of the group. Cannot be null.
-     */
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = true)
-    private Long  createdBy;
-    /**
-     * The date when the group was created. Cannot be null.
-     */
-  
+    @ManyToOne
+    @JoinColumn(name = "created_by", referencedColumnName = "uid", nullable = false)
+    private User createdBy;
+
     @Column(nullable = false)
     private LocalDate createdDate;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdDate = LocalDate.now();
+    }
 }

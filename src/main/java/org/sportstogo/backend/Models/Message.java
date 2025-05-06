@@ -5,54 +5,31 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.sportstogo.backend.idModels.MessageId;
+import org.sportstogo.backend.idModels.MessageID;
 
 import java.time.LocalDateTime;
 
-/**
- * Represents a message within a group sent by a user.
- * Each message contains an ID, the group ID, user ID, the message content, and the time the message was sent.
- */
 @Entity
 @Table(name = "Messages")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter @Setter
-@IdClass(MessageId.class)
+@IdClass(MessageID.class)
 public class Message {
-
-    /**
-     * The unique identifier for the message.
-     * It is automatically generated.
-     */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    Long id;
+    private Long ID;
 
-    /**
-     * The unique identifier of the group in which the message is sent.
-     */
-    @Id
-    private Long groupId;
+    @ManyToOne
+    @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false)
+    private Group groupID;
 
-    /**
-     * The unique identifier of the user who sent the message.
-     */
-    @Id
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "uid", nullable = false)
+    private User userID;
 
-    /**
-     * The content of the message sent by the user.
-     * Cannot be null.
-     */
     @Column(nullable = false)
     private String content;
 
-    /**
-     * The time when the message was sent.
-     * Cannot be null.
-     */
     @Column(nullable = false)
     private LocalDateTime timeSent;
-
 }
