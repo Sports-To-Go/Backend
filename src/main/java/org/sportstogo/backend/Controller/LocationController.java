@@ -31,7 +31,7 @@ public class LocationController {
      * Retrieves a all locations matching a series of filters
      * @return a list of all locations
      */
-    @GetMapping
+    @GetMapping("/filter")
     public ResponseEntity<List<Location>> getFiltered(@RequestParam String sport,
                                                       @RequestParam LocalTime start,
                                                       @RequestParam LocalTime end,
