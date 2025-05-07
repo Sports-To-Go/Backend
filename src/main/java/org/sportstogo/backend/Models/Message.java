@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.sportstogo.backend.DTOs.MessageDTO;
+import org.sportstogo.backend.Service.FirebaseTokenService;
 import org.sportstogo.backend.idModels.MessageID;
 
 import java.time.LocalDateTime;
@@ -19,6 +21,7 @@ public class Message {
     @Id
     private Long ID;
 
+    @Id
     @ManyToOne
     @JoinColumn(name = "group_id", referencedColumnName = "id", nullable = false)
     private Group groupID;
@@ -32,4 +35,13 @@ public class Message {
 
     @Column(nullable = false)
     private LocalDateTime timeSent;
+
+    public MessageDTO toDTO() {
+        return new MessageDTO(
+                ID,
+                FirebaseTokenService.getDisplayNameFromUid(userID.getUid()),
+                content,
+                timeSent.toString()
+        );
+    }
 }

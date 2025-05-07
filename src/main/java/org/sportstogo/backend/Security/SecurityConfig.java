@@ -30,6 +30,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/users/profile/**").authenticated()
+                        // this order FUCKING matters SO FUCKING MUCH DON'T TOUCH THIS OR I'M GOING TO HUNT YOU DOWN
+                        .requestMatchers("/social/chat/**").permitAll()
                         .requestMatchers("/social/**").authenticated()
                         .anyRequest().permitAll()
                 )
@@ -41,10 +43,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Allow the frontend origin
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE")); // Allow HTTP methods
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Allow necessary headers
-        configuration.setExposedHeaders(List.of("Authorization")); // Expose headers for client use
-        configuration.setAllowCredentials(true); // Allow cookies or credentials if needed
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Added OPTIONS
+        configuration.setAllowedHeaders(List.of("*")); // Allow all headers for WebSocket
+        configuration.setAllowCredentials(true); // Allow cookies or credentials
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // Apply the configuration to all endpoints
