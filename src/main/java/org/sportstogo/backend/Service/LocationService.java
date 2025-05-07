@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,35 @@ public class LocationService {
      */
     public List<Location> getLocations() {return locationRepository.findAll();}
 
+    /**
+     * Retrieves all locations matching a filter
+     * @return a list of all verified locations matching the filter
+     */
+    public Optional<List<Location>> getFiltered(String sport, LocalTime openingTime,
+                                                LocalTime closingTime, Double hourlyRate) {
+        List<Location> locations = locationRepository.findVerified();
+        if(locations.isEmpty()) {
+            return Optional.empty();
+        }
+        for(Location location : locations) {
+            if(sport!=null && !location.getSport().equals(sport)) {
+                locations.remove(location);
+            }
+            else if(openingTime!=null && location.getClosingTime().isBefore(openingTime)) {
+                locations.remove(location);
+            }
+            else if(closingTime!=null && location.getOpeningTime().isAfter(closingTime)) {
+                locations.remove(location);
+            }
+            else if(hourlyRate!=null && location.getHourlyRate()>=hourlyRate) {
+                locations.remove(location);
+            }
+        }
+        if(locations.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(locations);
+    }
     /**
      * Adds a new location to the database
      * @param location the location object from the request body

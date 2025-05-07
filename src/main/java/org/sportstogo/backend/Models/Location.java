@@ -46,7 +46,7 @@ public class Location {
      * the ID of the user who owns the location to the platform. cannot be nullable
      */
     @Column(nullable = false)
-    private Long createdBy;
+    private String createdBy;
     /**
      * a short description of the location
      */
@@ -84,7 +84,7 @@ public class Location {
      */
     private boolean verified;
 
-    public Location(String name,String address, double longitude,double latitude, Long createdBy,
+    public Location(String name,String address, double longitude,double latitude, String createdBy,
                     String description,String sport, String calendarId, double hourlyRate,
                     LocalTime openingTime, LocalTime closingTime) {
         this.name = name;
