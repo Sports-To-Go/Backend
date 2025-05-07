@@ -32,11 +32,11 @@ public class ReservationService {
         }
         Location location = locationOp.get();
         if (reservation.getStartTime().isBefore(location.getOpeningTime())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Start time is before the" +
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Start time is before the " +
                     "location's opening hours");
         }
         if (reservation.getEndTime().isAfter(location.getClosingTime())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("End time is after the" +
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("End time is after the " +
                     "location's closing hours");
         }
         List<Reservation> booked = reservationRepository.findByLocationId(reservation.getLocationId());
