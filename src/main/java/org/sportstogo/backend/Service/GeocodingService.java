@@ -1,9 +1,9 @@
 package org.sportstogo.backend.Service;
-
-import com.google.api.client.util.Value;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
 import java.util.List;
 import java.util.Map;
 
@@ -15,17 +15,21 @@ public class GeocodingService {
     public String reverseGeocode(double lat, double lng) {
         String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + lat + "," + lng + "&key=" + apiKey;
 
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
 
-        if (response.getStatusCode().is2xxSuccessful()) {
-            List results = (List) response.getBody().get("results");
-            if (!results.isEmpty()) {
-                Map firstResult = (Map) results.get(0);
-                return (String) firstResult.get("formatted_address");
+            if (response.getStatusCode().is2xxSuccessful()) {
+                List<Map<String, Object>> results = (List<Map<String, Object>>) response.getBody().get("results");
+                if (results != null && !results.isEmpty()) {
+                    String address = (String) results.get(0).get("formatted_address");
+                    return address;
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        throw new RuntimeException("Could not reverse geocode");
+        return null; // dacă nu găsește nimic
     }
 }

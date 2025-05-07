@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/geocode")
 public class GeocodingController {
@@ -18,9 +20,14 @@ public class GeocodingController {
     }
 
     @GetMapping("/reverse")
-    public ResponseEntity<String> reverseGeocode(@RequestParam double lat, @RequestParam double lng) {
+    public ResponseEntity<Map<String, String>> reverseGeocode(@RequestParam double lat, @RequestParam double lng) {
         String address = geocodingService.reverseGeocode(lat, lng);
-        return ResponseEntity.ok(address);
+        if (address != null) {
+            return ResponseEntity.ok(Map.of("address", address));
+        } else {
+            return ResponseEntity.ok(Map.of()); // sau Map.of("address", "")
+        }
     }
+
 }
 
