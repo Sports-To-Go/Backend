@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -35,11 +36,31 @@ public class ReportController {
      * @throws IllegalArgumentException if the report type specified is invalid
      */
     @GetMapping(path = "{report_type}")
-    public List<Report> getTypedReports(@PathVariable("report_type") String report_type) {
-        if (Arrays.stream(ReportTargetType.values()).noneMatch(t -> t.name().equals(report_type))) {
+    public List<Report> getReportsByType(@PathVariable("report_type") String report_type) {
+        if (Arrays.stream(ReportTargetType.values()).noneMatch(t -> t.name().equalsIgnoreCase(report_type))) {
             throw new IllegalArgumentException("Invalid report type");
         }
         return reportService.getReports().stream().filter(report -> report.getTargetType().toString().equals(report_type)).collect(Collectors.toList());
+    }
+
+    @GetMapping(path = "{report_type}/{target_id}/messages")
+    public List<String> getAllReasonsByTypeAndTargetId(@PathVariable("report_type") String report_type, @PathVariable("target_id") Long target_id) {
+
+        if (Arrays.stream(ReportTargetType.values()).noneMatch(t -> t.name().equalsIgnoreCase(report_type))) {
+            throw new IllegalArgumentException("Invalid report type");
+        }
+
+        List<String> reasons = reportService.getReports().stream()
+                .filter(report -> report.getTargetType().name().equalsIgnoreCase(report_type))
+                .filter(report -> report.getTargetId().equals(target_id))
+                .map(Report::getReason)
+                .collect(Collectors.toList());
+
+        if (reasons.isEmpty()) {
+            return null;
+        }
+
+        return reasons;
     }
 
     /**
@@ -68,7 +89,7 @@ public class ReportController {
                                                @RequestParam(required = false) ReportStatus status) {
         reportService.updateReport(id, reviewedBy, reviewedAt, status);
         return ResponseEntity.ok()
-                .body("Report with id " + id + " updated successful");
+                .body("Report with id " + id + " updated successfuly");
     }
 
     /**
@@ -80,7 +101,29 @@ public class ReportController {
     public ResponseEntity<String> deleteReport(@PathVariable("report_id") Long id) {
         reportService.deleteReport(id);
         return ResponseEntity.ok()
-                .body("Report with id " + id + " deleted successful");
+                .body("Report with id " + id + " deleted successfully");
     }
 
+    @Transactional
+    @DeleteMapping(path = "{target_type}/{target_id}")
+    public ResponseEntity<String> deleteReportByTargetIdAndType(@PathVariable("target_type") String targetType, @PathVariable("target_id") Long id) {
+
+        if (Arrays.stream(ReportTargetType.values()).noneMatch(t -> t.name().equalsIgnoreCase(targetType))) {
+            return ResponseEntity.badRequest().body("Invalid target type");
+        }
+
+        List<Report> reportList = reportService.getReports().stream()
+                .filter(report -> report.getTargetType().name().equalsIgnoreCase(targetType))
+                .filter(report -> report.getTargetId().equals(id)).toList();
+
+        if (reportList.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        for (Report report : reportList) {
+            reportService.deleteReport(report.getId());
+        }
+
+        return ResponseEntity.ok("Reports for user id " + id + " deleted successfully");
+    }
 }

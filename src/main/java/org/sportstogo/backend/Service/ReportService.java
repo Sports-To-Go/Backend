@@ -1,6 +1,5 @@
 package org.sportstogo.backend.Service;
 
-
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.GroupMembership;
@@ -49,7 +48,6 @@ public class ReportService {
         if (status != null) {
             report.setStatus(status);
         }
-
     }
 
     public void deleteReport(Long id) {
