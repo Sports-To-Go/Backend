@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * REST Controller for managing Location entities
@@ -37,11 +36,7 @@ public class LocationController {
                                                       @RequestParam(required = false) LocalTime start,
                                                       @RequestParam(required = false) LocalTime end,
                                                       @RequestParam(required = false) Double price) {
-        List<Location> locations=locationService.getFiltered(sport, start, end, price);
-        if(locations.isEmpty()) {
-            return null;
-        }
-        return locations;
+        return locationService.getFiltered(sport, start, end, price);
     }
 
     /**

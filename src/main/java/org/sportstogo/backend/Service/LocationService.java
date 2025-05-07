@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,26 +37,24 @@ public class LocationService {
                                                 LocalTime closingTime, Double hourlyRate) {
         List<Location> locations = locationRepository.findAll();
         if(locations.isEmpty()) {
-            return null;
+            return locations;
         }
+        List<Location> filteredLocations = new ArrayList<>(locations);
         for(Location location : locations) {
             if(sport!=null && !location.getSport().equals(sport)) {
-                locations.remove(location);
+                filteredLocations.remove(location);
             }
             else if(openingTime!=null && location.getClosingTime().isBefore(openingTime)) {
-                locations.remove(location);
+                filteredLocations.remove(location);
             }
             else if(closingTime!=null && location.getOpeningTime().isAfter(closingTime)) {
-                locations.remove(location);
+                filteredLocations.remove(location);
             }
             else if(hourlyRate!=null && location.getHourlyRate()>=hourlyRate) {
-                locations.remove(location);
+                filteredLocations.remove(location);
             }
         }
-        if(locations.isEmpty()) {
-            return null;
-        }
-        return locations;
+        return filteredLocations;
     }
     /**
      * Adds a new location to the database
