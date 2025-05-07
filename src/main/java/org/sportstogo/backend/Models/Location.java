@@ -77,8 +77,9 @@ public class Location {
     /**
      *
      */
-    @OneToMany(cascade = CascadeType.ALL,mappedBy = "location")
+    /*@OneToMany(cascade = CascadeType.ALL,mappedBy = "location")
     private List<Location_Image> images=new ArrayList<>();
+     */
     /**
      * the date when the location was added to the system
      */

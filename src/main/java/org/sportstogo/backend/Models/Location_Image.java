@@ -25,7 +25,8 @@ public class Location_Image {
     @Column(nullable = false)
     private String url;
 
-    @ManyToOne
+    /*@ManyToOne
     @JoinColumn(name="location_id")
     private Location location;
+     */
 }
