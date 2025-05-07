@@ -21,7 +21,7 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    @GetMapping(path = "recent-users")
+    @GetMapping(path = "/recent-users")
     public ResponseEntity<List<User>> getRecentUsers() {
         List<User> users = this.adminService.getUsersRegisteredLastWeek();
         if (users.isEmpty()) {
