@@ -3,6 +3,8 @@ package org.sportstogo.backend.Service;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.ChatPreviewDTO;
 import org.sportstogo.backend.DTOs.GroupCreationDTO;
+import org.sportstogo.backend.DTOs.GroupDataDTO;
+import org.sportstogo.backend.DTOs.GroupMemberDTO;
 import org.sportstogo.backend.Enums.Role;
 import org.sportstogo.backend.Exceptions.UserNotFoundException;
 import org.sportstogo.backend.Models.Group;
@@ -49,4 +51,28 @@ public class GroupService {
 
         return createdGroup;
     }
+
+    public GroupDataDTO getGroupData(Long groupID) {
+        GroupDataDTO groupDataDTO = new GroupDataDTO();
+        Group group = groupRepository.findById(groupID).orElse(null);
+        if (group == null) {
+            return null;
+        }
+
+        groupDataDTO.setDescription(group.getDescription());
+        groupDataDTO.setName(group.getName());
+
+        // Fetch group members
+        List<GroupMembership> memberships = groupMembershipRepository.findByGroupID(group);
+        List<GroupMemberDTO> groupMembers = memberships.stream()
+                .map(membership -> new GroupMemberDTO(
+                        FirebaseTokenService.getDisplayNameFromUid(membership.getUserID().getUid()),
+                        membership.getUserID().getUid()
+                ))
+                .toList();
+        groupDataDTO.setGroupMembers(groupMembers);
+
+        return groupDataDTO;
+    }
+
 }

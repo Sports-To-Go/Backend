@@ -29,15 +29,14 @@ public class ChatService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
     private final GroupMembershipRepository groupMembershipRepository;
-
     /**
      * Extract Group ID from WebSocket Session URI
      */
     private Long extractGroupId(WebSocketSession session) {
-        String groupIdStr = session.getAttributes().get("groupID").toString();
+        Object groupIdStr = session.getAttributes().get("groupID");
 
         try {
-            return Long.parseLong(groupIdStr);
+            return Long.parseLong(groupIdStr.toString());
         } catch (NumberFormatException e) {
             System.err.println("Invalid group ID: " + groupIdStr);
             return null;

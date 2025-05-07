@@ -8,9 +8,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter @Getter
-public class MessageDTO {
-    private Long id;
-    private String senderID;
-    private String content;
-    private String timestamp;
+public class GroupMemberDTO {
+    private String displayName;
+    private String id;
+//    private String photoUrl;
 }

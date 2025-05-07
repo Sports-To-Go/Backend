@@ -23,6 +23,8 @@ public class Group {
     @Column(nullable = false)
     private String name;
 
+    private String description;
+
     @ManyToOne
     @JoinColumn(name = "created_by", referencedColumnName = "uid", nullable = false)
     private User createdBy;

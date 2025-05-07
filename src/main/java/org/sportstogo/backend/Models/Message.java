@@ -39,7 +39,7 @@ public class Message {
     public MessageDTO toDTO() {
         return new MessageDTO(
                 ID,
-                FirebaseTokenService.getDisplayNameFromUid(userID.getUid()),
+                userID.getUid(),
                 content,
                 timeSent.toString()
         );
