@@ -33,15 +33,15 @@ public class LocationController {
      * @return a list of all locations
      */
     @GetMapping("/filter")
-    public ResponseEntity<List<Location>> getFiltered(@RequestParam(required = false) Sport sport,
+    public List<Location> getFiltered(@RequestParam(required = false) Sport sport,
                                                       @RequestParam(required = false) LocalTime start,
                                                       @RequestParam(required = false) LocalTime end,
                                                       @RequestParam(required = false) Double price) {
-        Optional<List<Location>> locations=locationService.getFiltered(sport, start, end, price);
-        if(locations.isPresent()) {
-            return ResponseEntity.ok(locations.get());
+        List<Location> locations=locationService.getFiltered(sport, start, end, price);
+        if(locations.isEmpty()) {
+            return null;
         }
-        return ResponseEntity.notFound().build();
+        return locations;
     }
 
     /**

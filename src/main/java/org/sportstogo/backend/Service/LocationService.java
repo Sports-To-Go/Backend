@@ -32,11 +32,11 @@ public class LocationService {
      * Retrieves all locations matching a filter
      * @return a list of all verified locations matching the filter
      */
-    public Optional<List<Location>> getFiltered(Sport sport, LocalTime openingTime,
+    public List<Location> getFiltered(Sport sport, LocalTime openingTime,
                                                 LocalTime closingTime, Double hourlyRate) {
         List<Location> locations = locationRepository.findAll();
         if(locations.isEmpty()) {
-            return Optional.empty();
+            return null;
         }
         for(Location location : locations) {
             if(sport!=null && !location.getSport().equals(sport)) {
@@ -53,9 +53,9 @@ public class LocationService {
             }
         }
         if(locations.isEmpty()) {
-            return Optional.empty();
+            return null;
         }
-        return Optional.of(locations);
+        return locations;
     }
     /**
      * Adds a new location to the database
