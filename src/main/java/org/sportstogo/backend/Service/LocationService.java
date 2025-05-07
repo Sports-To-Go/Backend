@@ -3,6 +3,7 @@ package org.sportstogo.backend.Service;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.Models.Location;
+import org.sportstogo.backend.Models.Sport;
 import org.sportstogo.backend.Repository.LocationRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,9 +32,9 @@ public class LocationService {
      * Retrieves all locations matching a filter
      * @return a list of all verified locations matching the filter
      */
-    public Optional<List<Location>> getFiltered(String sport, LocalTime openingTime,
+    public Optional<List<Location>> getFiltered(Sport sport, LocalTime openingTime,
                                                 LocalTime closingTime, Double hourlyRate) {
-        List<Location> locations = locationRepository.findVerified();
+        List<Location> locations = locationRepository.findAll();
         if(locations.isEmpty()) {
             return Optional.empty();
         }

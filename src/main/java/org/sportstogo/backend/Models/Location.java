@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="Locations")
@@ -43,7 +44,7 @@ public class Location {
     @Column(nullable = false)
     private double latitude;
     /**
-     * the ID of the user who owns the location to the platform. cannot be nullable
+     * the ID of the user who owns the location to the platform. cannot be null
      */
     @Column(nullable = false)
     private String createdBy;
@@ -52,9 +53,11 @@ public class Location {
      */
     private String description;
     /**
-     * the sport that can be practiced at the location
+     * the sport that can be practiced at the location. cannot be null
      */
-    private String sport;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Sport sport;
     /**
      * calendar ID
      */
@@ -74,7 +77,8 @@ public class Location {
     /**
      *
      */
-    private String imageUrls;
+    @OneToMany(cascade = CascadeType.ALL,mappedBy = "location")
+    private List<Location_Image> images=new ArrayList<>();
     /**
      * the date when the location was added to the system
      */
@@ -85,7 +89,7 @@ public class Location {
     private boolean verified;
 
     public Location(String name,String address, double longitude,double latitude, String createdBy,
-                    String description,String sport, String calendarId, double hourlyRate,
+                    String description,Sport sport, String calendarId, double hourlyRate,
                     LocalTime openingTime, LocalTime closingTime) {
         this.name = name;
         this.address = address;
