@@ -1,6 +1,7 @@
 package org.sportstogo.backend.config;
 
 import org.sportstogo.backend.WebSocketHandlers.ChatWebSocketHandler;
+import org.sportstogo.backend.WebSocketHandlers.ProtocolAuthHandshakeInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -22,6 +23,8 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry
                 .addHandler(chatWebSocketHandler, "/social/chat/{groupID}")
+                .addInterceptors(new ProtocolAuthHandshakeInterceptor())
                 .setAllowedOrigins(allowedOrigins.split(","));
+
     }
 }

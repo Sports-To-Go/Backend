@@ -12,6 +12,7 @@ import java.util.List;
 @Setter @Getter
 public class GroupDataDTO {
     private List<GroupMemberDTO> groupMembers;
+    private List<JoinRequestDTO> joinRequests;
     private String name;
     private String description;
 }

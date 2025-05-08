@@ -1,6 +1,6 @@
 package org.sportstogo.backend.Repository;
 
-import org.sportstogo.backend.DTOs.ChatPreviewDTO;
+import org.sportstogo.backend.DTOs.GroupPreviewDTO;
 import org.sportstogo.backend.Models.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,7 +14,7 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     @Query(value = """
         SELECT g.id AS id, g.name AS name,\s
                CAST(COUNT(DISTINCT gm.user_id) AS INT) AS memberCount,\s
-               COALESCE(m.content, 'No messages yet') AS lastMessageContent
+               COALESCE(m.content, 'No messages yet') AS description
         FROM groups g
         INNER JOIN group_memberships gm ON g.id = gm.group_id
         LEFT JOIN (
@@ -33,6 +33,28 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
         )
         GROUP BY g.id, g.name, m.content
        \s""", nativeQuery = true)
-    List<ChatPreviewDTO> findChatPreviewsByUserId(@Param("uid") String uid);
+    List<GroupPreviewDTO> findChatPreviewsByUserId(@Param("uid") String uid);
+
+    @Query(value = """
+        SELECT g.id AS id, g.name AS name,
+               CAST(COUNT(DISTINCT gm.user_id) AS INT) AS memberCount,
+               COALESCE(g.description, 'No description') AS description
+        FROM groups g
+        LEFT JOIN group_memberships gm ON g.id = gm.group_id
+        WHERE g.id NOT IN (
+            SELECT group_id
+            FROM group_memberships
+            WHERE user_id = :uid
+        )
+        AND g.id NOT IN (
+            SELECT group_id
+            FROM join_requests
+            WHERE user_id = :uid
+        )
+        GROUP BY g.id, g.name, g.description
+    """, nativeQuery = true)
+    List<GroupPreviewDTO> findGroupRecommendations(@Param("uid") String uid);
+
+
 }
 

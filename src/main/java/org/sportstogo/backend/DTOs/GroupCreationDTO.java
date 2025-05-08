@@ -11,4 +11,6 @@ import lombok.Setter;
 @Getter
 public class GroupCreationDTO {
     private String name;
+    private String description;
+//    private String photoURL;
 }
