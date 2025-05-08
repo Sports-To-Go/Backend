@@ -25,12 +25,16 @@ public class LocationService {
 
     /**
      * Retrieves all the locations from the database
+     *
      * @return a list of all locations
      */
-    public List<Location> getLocations() {return locationRepository.findAll();}
+    public List<Location> getLocations() {
+        return locationRepository.findAll();
+    }
 
     /**
      * Retrieves all locations matching a filter
+     *
      * @return a list of all verified locations matching the filter
      */
     public List<Location> getFiltered(Sport sport, LocalTime openingTime,
@@ -38,7 +42,7 @@ public class LocationService {
         return locationRepository.findAll().stream()
                 .filter(location -> {
                     boolean matchesSport = (sport == null || location.getSport() == sport);
-                    
+
                     LocalTime locClosing = location.getClosingTime().equals(LocalTime.MIDNIGHT)
                             ? LocalTime.of(23, 59)
                             : location.getClosingTime();
@@ -68,19 +72,18 @@ public class LocationService {
     }
 
 
-
-    private int minutes(LocalTime t) {
-        return t.getHour() * 60 + t.getMinute();
-    }
-
     /**
      * Adds a new location to the database
+     *
      * @param location the location object from the request body
      * @return HTTP CREATED if successful, HTTP CONFLICT otherwise
      */
     public ResponseEntity<String> addNewLocation(Location location) {
-        if(this.locationRepository.findByName(location.getName()).isPresent()) {
+        if (this.locationRepository.findByName(location.getName()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("The location already exists");
+        }
+        if (location.getClosingTime().equals(LocalTime.MIDNIGHT)) {
+            location.setClosingTime(LocalTime.of(23, 59));
         }
         location.setCreatedAt(LocalDate.now());
         location.setVerified(false);
@@ -90,11 +93,12 @@ public class LocationService {
 
     /**
      * Deletes a location by its ID
+     *
      * @param id the ID of the location to be removed
      * @return HTTP OK if successful, HTTP CONFLICT otherwise
      */
     public ResponseEntity<String> deleteById(Long id) {
-        if(locationRepository.findById(id).isEmpty()) {
+        if (locationRepository.findById(id).isEmpty()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Location not found");
         }
         locationRepository.deleteById(id);
@@ -103,7 +107,8 @@ public class LocationService {
 
     /**
      * Updates the name of an existing location
-     * @param id the id of the location whose name is to be changed
+     *
+     * @param id   the id of the location whose name is to be changed
      * @param name the new name of the location
      * @return HTTP OK if successful, HTTP CONFLICT otherwise
      */
