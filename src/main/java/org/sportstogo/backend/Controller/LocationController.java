@@ -35,7 +35,7 @@ public class LocationController {
     public List<Location> getFiltered(@RequestParam(required = false) Sport sport,
                                                       @RequestParam(required = false) LocalTime start,
                                                       @RequestParam(required = false) LocalTime end,
-                                                      @RequestParam(required = false) Double price) {
+                                                      @RequestParam(required = false) String price) {
         return locationService.getFiltered(sport, start, end, price);
     }
 

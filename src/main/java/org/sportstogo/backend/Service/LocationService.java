@@ -34,28 +34,45 @@ public class LocationService {
      * @return a list of all verified locations matching the filter
      */
     public List<Location> getFiltered(Sport sport, LocalTime openingTime,
-                                                LocalTime closingTime, Double hourlyRate) {
-        List<Location> locations = locationRepository.findAll();
-        if(locations.isEmpty()) {
-            return locations;
-        }
-        List<Location> filteredLocations = new ArrayList<>(locations);
-        for(Location location : locations) {
-            if(sport!=null && !location.getSport().equals(sport)) {
-                filteredLocations.remove(location);
-            }
-            else if(openingTime!=null && location.getClosingTime().isBefore(openingTime)) {
-                filteredLocations.remove(location);
-            }
-            else if(closingTime!=null && location.getOpeningTime().isAfter(closingTime)) {
-                filteredLocations.remove(location);
-            }
-            else if(hourlyRate!=null && location.getHourlyRate()>=hourlyRate) {
-                filteredLocations.remove(location);
-            }
-        }
-        return filteredLocations;
+                                      LocalTime closingTime, String priceOrder) {
+        return locationRepository.findAll().stream()
+                .filter(location -> {
+                    boolean matchesSport = (sport == null || location.getSport() == sport);
+                    
+                    LocalTime locClosing = location.getClosingTime().equals(LocalTime.MIDNIGHT)
+                            ? LocalTime.of(23, 59)
+                            : location.getClosingTime();
+
+                    boolean matchesTime = true;
+
+                    if (openingTime != null) {
+                        matchesTime &= location.getOpeningTime().compareTo(openingTime) <= 0;
+                    }
+
+                    if (closingTime != null) {
+                        matchesTime &= locClosing.compareTo(closingTime) >= 0;
+                    }
+
+                    return matchesSport && matchesTime;
+                })
+                .sorted((l1, l2) -> {
+                    if ("ascending".equalsIgnoreCase(priceOrder)) {
+                        return Double.compare(l1.getHourlyRate(), l2.getHourlyRate());
+                    } else if ("descending".equalsIgnoreCase(priceOrder)) {
+                        return Double.compare(l2.getHourlyRate(), l1.getHourlyRate());
+                    } else {
+                        return 0;
+                    }
+                })
+                .toList();
     }
+
+
+
+    private int minutes(LocalTime t) {
+        return t.getHour() * 60 + t.getMinute();
+    }
+
     /**
      * Adds a new location to the database
      * @param location the location object from the request body
