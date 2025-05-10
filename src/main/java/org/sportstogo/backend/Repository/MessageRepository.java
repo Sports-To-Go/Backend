@@ -1,36 +1,27 @@
 package org.sportstogo.backend.Repository;
 
+import jakarta.transaction.Transactional;
 import org.sportstogo.backend.Models.Message;
-import org.sportstogo.backend.idModels.MessageId;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-/**
- * Repository interface for performing CRUD operations on the Message entity.
- * Provides methods to query messages based on group ID and retrieve messages ordered by their sent time.
- */
 @Repository
-public interface MessageRepository extends JpaRepository<Message, MessageId> {
+public interface MessageRepository extends JpaRepository<Message, Long> {
+    @Query(value = "SELECT * FROM Messages WHERE group_id = :groupId ORDER BY time_sent LIMIT :limit",
+            nativeQuery = true)
+    List<Message> findRecentByGroupId(@Param("groupId") Long groupId, @Param("limit") int limit);
 
-    /**
-     * Finds a limited number of messages from a specific group, ordered by the time they were sent in descending order.
-     *
-     * @param groupId The ID of the group to fetch messages for.
-     * @param n The number of messages to retrieve.
-     * @return A list of messages from the specified group, ordered by time sent.
-     */
-    @Query("select m from Message m where m.groupId = ?1 order by m.timeSent Desc limit ?2")
-    List<Message> findByGroupIdNr(Long groupId, int n);
 
-    /**
-     * Finds all messages from a specific group, ordered by the time they were sent.
-     *
-     * @param groupId The ID of the group to fetch messages for.
-     * @return A list of all messages from the specified group.
-     */
-    @Query("select m from Message m where m.groupId = ?1")
-    List<Message> findByGroupId(Long groupId);
+    @Query("SELECT MAX(m.ID) FROM Message m WHERE m.groupID.id = :groupId")
+    Long findMaxIdByGroupId(@Param("groupId") Long groupId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Message m WHERE m.groupID.id = :groupId")
+    void deleteAllByGroupId(@Param("groupId") Long groupId);
 }
