@@ -3,21 +3,16 @@ package org.sportstogo.backend.Controller;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.*;
 import org.sportstogo.backend.Models.Group;
-import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.Models.JoinRequest;
-import org.sportstogo.backend.Models.User;
 import org.sportstogo.backend.Service.GroupMembershipService;
 import org.sportstogo.backend.Service.GroupService;
 import org.sportstogo.backend.Service.JoinRequestService;
-import org.sportstogo.backend.idModels.GroupMemberID;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "social")
@@ -81,6 +76,7 @@ public class SocialController {
         }
 
         GroupMemberDTO groupMemberDTO = request.isAccepted() ? groupMembershipService.addGroupMember(request.getGroupId(), request.getId()) : null;
+        joinRequestService.removeRequest(request.getGroupId(), request.getId());
 
         return ResponseEntity.ok(groupMemberDTO);
     }

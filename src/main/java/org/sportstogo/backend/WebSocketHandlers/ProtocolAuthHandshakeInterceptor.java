@@ -15,17 +15,17 @@ public class ProtocolAuthHandshakeInterceptor implements HandshakeInterceptor {
                                    WebSocketHandler wsHandler, Map<String, Object> attributes) {
 
         String origin = request.getHeaders().getOrigin();
-        System.out.printf("Handshake Origin: {}\n", origin);
+//        System.out.printf("Handshake Origin: {}\n", origin);
 
         if (!"http://localhost:5173".equals(origin)) {
-            System.out.printf("Origin {} not allowed\n", origin);
+//            System.out.printf("Origin {} not allowed\n", origin);
             return false; // Reject connection
         }
 
         List<String> protocols = request.getHeaders().get("Sec-WebSocket-Protocol");
         if (protocols != null && !protocols.isEmpty()) {
             String protocol = protocols.get(0);
-            System.out.printf("Setting Sec-WebSocket-Protocol: {}\n", protocol);
+//            System.out.printf("Setting Sec-WebSocket-Protocol: {}\n", protocol);
             response.getHeaders().add("Sec-WebSocket-Protocol", protocol);
             attributes.put("protocol", protocol);
         }

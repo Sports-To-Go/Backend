@@ -132,7 +132,6 @@ public class ChatService {
 
         } catch (Exception e) {
             System.err.println("Error handling message: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 

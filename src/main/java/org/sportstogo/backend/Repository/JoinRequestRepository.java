@@ -14,4 +14,7 @@ import java.util.List;
 public interface JoinRequestRepository extends JpaRepository<JoinRequest, GroupMemberID> {
     @Query("SELECT jr FROM JoinRequest jr WHERE jr.groupID = :group")
     List<JoinRequest> findByGroupID(@Param("group") Group group);
+
+    @Query("SELECT j FROM JoinRequest j WHERE j.groupID.id = :groupId AND j.userID.uid = :id")
+    JoinRequest findByGroupIDAndUserID(Long groupId, String id);
 }

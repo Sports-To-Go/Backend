@@ -1,6 +1,7 @@
 package org.sportstogo.backend.Service;
 
 import lombok.AllArgsConstructor;
+import org.sportstogo.backend.DTOs.JoinRequestDTO;
 import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.JoinRequest;
 import org.sportstogo.backend.Models.User;
@@ -38,4 +39,9 @@ public class JoinRequestService {
     }
 
 
+    public void removeRequest(Long groupId, String id) {
+        JoinRequest request = joinRequestRepository.findByGroupIDAndUserID(groupId, id);
+        if (request == null) return;
+        joinRequestRepository.delete(request);
+    }
 }
