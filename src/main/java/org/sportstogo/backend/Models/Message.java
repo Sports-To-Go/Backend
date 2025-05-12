@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 @IdClass(MessageID.class)
 public class Message {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "message_seq")
+    @SequenceGenerator(name = "message_seq", sequenceName = "message_id_seq", allocationSize = 1)
     private Long ID;
 
     @Id

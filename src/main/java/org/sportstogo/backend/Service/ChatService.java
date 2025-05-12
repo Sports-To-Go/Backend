@@ -3,9 +3,8 @@ package org.sportstogo.backend.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.MessageDTO;
-import org.sportstogo.backend.Models.Group;
+import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.Models.Message;
-import org.sportstogo.backend.Models.User;
 import org.sportstogo.backend.Repository.GroupMembershipRepository;
 import org.sportstogo.backend.Repository.GroupRepository;
 import org.sportstogo.backend.Repository.MessageRepository;
@@ -83,6 +82,7 @@ public class ChatService {
      */
     public void handleNewMessage(WebSocketSession senderSession, String messageContent) {
         try {
+            var now = LocalDateTime.now();
             MessageDTO incomingMessage = objectMapper.readValue(messageContent, MessageDTO.class);
             Long groupId = extractGroupId(senderSession);
             String senderId = (String) senderSession.getAttributes().get("uid");
@@ -91,40 +91,28 @@ public class ChatService {
                 return;
             }
 
-            // Verify user belongs to the group
-            if (!groupMembershipRepository.existsByUserIDAndGroupID(senderId, groupId)) {
-                System.err.println("User " + senderId + " is not a member of group " + groupId);
+            GroupMembership groupMembership = groupMembershipRepository.findByUserIDAndGroupID(senderId, groupId);
+
+
+
+            if  (groupMembership == null) {
+                System.out.println("GroupMembership not found");
                 return;
             }
-
-            // Find the group and user
-            Optional<Group> groupOpt = groupRepository.findById(groupId);
-            Optional<User> userOpt = userRepository.findById(senderId);
-
-            if (groupOpt.isEmpty() || userOpt.isEmpty()) {
-                System.err.println("Group or user not found");
-                return;
-            }
-
-            Group group = groupOpt.get();
-            User user = userOpt.get();
 
             // Create and save message
             Message message = new Message();
-            Long maxId = messageRepository.findMaxIdByGroupId(groupId);
-            Long nextId = (maxId != null) ? maxId + 1 : 1L;
-
-            message.setID(nextId);
-            message.setGroupID(group);
-            message.setUserID(user);
+            message.setGroupID(groupMembership.getGroupID());
+            message.setUserID(groupMembership.getUserID());
             message.setContent(incomingMessage.getContent());
             message.setTimeSent(LocalDateTime.now());
 
             // Save message
-            Message savedMessage = messageRepository.save(message);
-
+            Long id = messageRepository.insert(groupId, senderId, message.getContent(),message.getTimeSent());
+            System.out.println(LocalDateTime.now().minusNanos(now.getNano()).getNano());
             // Convert to DTO for broadcasting
-            MessageDTO messageDTO = savedMessage.toDTO();
+            message.setID(id);
+            MessageDTO messageDTO = message.toDTO();
             String jsonMessage = objectMapper.writeValueAsString(messageDTO);
 
             // Broadcast to all users in the group

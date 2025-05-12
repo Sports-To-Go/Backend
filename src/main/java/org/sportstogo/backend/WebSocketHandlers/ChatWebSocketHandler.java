@@ -86,12 +86,6 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        String uid = (String) session.getAttributes().get("uid");
-        Long groupId = (Long) session.getAttributes().get("groupID");
-
-        System.out.println("Message from user " + uid + " in group " + groupId + ": " + message.getPayload());
-
-        // Process and broadcast the message
         chatService.handleNewMessage(session, message.getPayload());
     }
 

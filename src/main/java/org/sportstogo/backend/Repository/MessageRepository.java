@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -24,4 +25,16 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Transactional
     @Query("DELETE FROM Message m WHERE m.groupID.id = :groupId")
     void deleteAllByGroupId(@Param("groupId") Long groupId);
+
+    @Query(value = """
+    INSERT INTO messages (id, group_id, user_id, content, time_sent)
+    VALUES (nextval('message_id_seq'), :groupId, :userId, :content, :timeSent)
+    RETURNING id
+    """, nativeQuery = true)
+    Long insert(@Param("groupId") Long groupId,
+                            @Param("userId") String userId,
+                            @Param("content") String content,
+                            @Param("timeSent") LocalDateTime timeSent);
+
+
 }
