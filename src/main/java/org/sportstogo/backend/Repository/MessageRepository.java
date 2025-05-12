@@ -13,9 +13,29 @@ import java.util.List;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    @Query(value = "SELECT * FROM Messages WHERE group_id = :groupId ORDER BY time_sent LIMIT :limit",
-            nativeQuery = true)
-    List<Message> findRecentByGroupId(@Param("groupId") Long groupId, @Param("limit") int limit);
+    @Query(
+            value = """
+    (
+      SELECT * FROM messages
+      WHERE time_sent < :timestamp
+        AND group_id = :groupId
+      ORDER BY time_sent DESC 
+      LIMIT 50
+    )
+    UNION ALL
+    (
+      SELECT * FROM messages
+      WHERE time_sent = :timestamp
+        AND group_id = :groupId
+    )
+    ORDER BY time_sent ASC
+    """,
+            nativeQuery = true
+    )
+    List<Message> findRecentByGroupId(
+            @Param("groupId") Long groupId,
+            @Param("timestamp") LocalDateTime timestamp
+    );
 
 
     @Query("SELECT MAX(m.ID) FROM Message m WHERE m.groupID.id = :groupId")

@@ -69,12 +69,12 @@ public class ChatService {
     /**
      * Get recent messages for a group
      */
-    public List<Message> getRecentMessages(WebSocketSession session, int limit) {
+    public List<Message> getRecentMessages(WebSocketSession session, LocalDateTime timestamp) {
         Long groupId = extractGroupId(session);
         if (groupId == null) {
             return List.of();
         }
-        return messageRepository.findRecentByGroupId(groupId, limit);
+        return messageRepository.findRecentByGroupId(groupId, timestamp);
     }
 
     /**

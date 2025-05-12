@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -68,7 +69,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             chatService.addSessionToGroup(session);
 
             // Send recent messages history to the newly connected user
-            List<Message> recentMessages = chatService.getRecentMessages(session, INITIAL_MESSAGE_LOAD);
+            List<Message> recentMessages = chatService.getRecentMessages(session, LocalDateTime.now());
 
             // Convert each message to DTO and send
             ObjectMapper objectMapper = new ObjectMapper();
