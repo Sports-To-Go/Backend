@@ -20,13 +20,13 @@ public class Report {
     private Long id;
 
     @Column(nullable = false)
-    private Long reportedBy;
+    private String reportedBy;
 
     @Column(nullable = false)
     private ReportTargetType targetType;
 
     @Column(nullable = false)
-    private Long targetId;
+    private String targetId;
 
     @Column(nullable = false)
     private String reason;
@@ -36,7 +36,7 @@ public class Report {
 
     private LocalDate createdAt;
 
-    private Long reviewedBy;
+    private String reviewedBy;
 
     private LocalDate reviewedAt;
 
