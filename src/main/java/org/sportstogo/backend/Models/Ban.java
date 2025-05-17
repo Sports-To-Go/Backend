@@ -9,37 +9,28 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "reports")
+@Table(name = "bans")
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
-public class Report {
+public class Ban {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(nullable = false)
-    private String reportedBy;
+    private String idUser;
 
     @Column(nullable = false)
-    private ReportTargetType targetType;
+    private LocalDate beginTime;
 
     @Column(nullable = false)
-    private String targetId;
+    private int duration;
 
     @Column(nullable = false)
     private String reason;
 
     @Column(nullable = false)
-    private ReportStatus status;
-
-    private LocalDate createdAt;
-
-    private String reviewedBy;
-
-    private LocalDate reviewedAt;
-
-    private LocalDate userNotifiedAt;
-
+    private String bannedBy;
 }
