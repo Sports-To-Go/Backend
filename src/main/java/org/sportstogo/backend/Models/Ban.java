@@ -26,9 +26,6 @@ public class Ban {
     private LocalDate beginTime;
 
     @Column(nullable = false)
-    private LocalDate endTime;
-
-    @Column(nullable = false)
     private int duration;
 
     @Column(nullable = false)
