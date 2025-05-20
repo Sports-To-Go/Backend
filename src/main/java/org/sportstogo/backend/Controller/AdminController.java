@@ -8,6 +8,8 @@ import org.sportstogo.backend.Service.ReportService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -30,7 +32,16 @@ public class AdminController {
     }
 
     @GetMapping(path = "recent-users")
-    public ResponseEntity<List<User>> getRecentUsers() {
+    public ResponseEntity<List<User>> getRecentUsers(Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         List<User> users = this.adminService.getUsersRegisteredLastWeek();
         if (users.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -39,27 +50,68 @@ public class AdminController {
     }
 
     @GetMapping("/locations/count")
-    public ResponseEntity<Long> getLocationCount() {
+    public ResponseEntity<Long> getLocationCount(Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         long locationCount = adminService.getLocationCount();
         return ResponseEntity.ok(locationCount);
     }
 
     @GetMapping("/reservations/count")
-    public ResponseEntity<Long> getReservationCount() {
+    public ResponseEntity<Long> getReservationCount(Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         long reservationCount = adminService.getReservationCount();
         return ResponseEntity.ok(reservationCount);
     }
 
     @GetMapping("/recent-users/count")
-    public ResponseEntity<Long> getUsersRegisteredLastWeekCount() {
+    public ResponseEntity<Long> getUsersRegisteredLastWeekCount(Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         long count = adminService.getNumberOfUsersRegisteredInLastWeek();
         return ResponseEntity.ok(count);
     }
 
     public ResponseEntity<List<Revenue>> getMonthlyRevenue(
             @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam("to")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+            @RequestParam("to")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            Authentication authentication
     ) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         List<Revenue> revenues = adminService.getMonthlyRevenue(from, to);
         return revenues.isEmpty()
                 ? ResponseEntity.noContent().build()
@@ -73,8 +125,19 @@ public class AdminController {
     @GetMapping("/revenue/annual")
     public ResponseEntity<List<Revenue>> getAnnualRevenue(
             @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam("to")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+            @RequestParam("to")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            Authentication authentication
     ) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         List<Revenue> revenues = adminService.getAnnualRevenue(from, to);
         return revenues.isEmpty()
                 ? ResponseEntity.noContent().build()
@@ -90,7 +153,19 @@ public class AdminController {
      * @return returns all reports
      */
     @GetMapping(path = "reports")
-    public List<Report> getAllReports() { return reportService.getReports(); }
+    public ResponseEntity<List<Report>> getAllReports(Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
+        return ResponseEntity.ok(reportService.getReports());
+    }
 
     /**
      *
@@ -99,15 +174,46 @@ public class AdminController {
      * @throws IllegalArgumentException if the report type specified is invalid
      */
     @GetMapping(path = "reports/{report_type}")
-    public List<Report> getReportsByType(@PathVariable("report_type") String report_type) {
+    public ResponseEntity<List<Report>> getReportsByType(@PathVariable("report_type") String report_type, Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         if (Arrays.stream(ReportTargetType.values()).noneMatch(t -> t.name().equalsIgnoreCase(report_type.toLowerCase()))) {
             throw new IllegalArgumentException("Invalid report type");
         }
-        return reportService.getReports().stream().filter(report -> report.getTargetType().toString().equalsIgnoreCase(report_type.toLowerCase())).collect(Collectors.toList());
+        return ResponseEntity.ok(
+                reportService
+                        .getReports()
+                        .stream()
+                        .filter(report -> report
+                                        .getTargetType()
+                                        .toString()
+                                        .equalsIgnoreCase(report_type.toLowerCase()))
+                        .collect(Collectors.toList()));
     }
 
     @GetMapping(path = "reports/{report_type}/{target_id}/messages")
-    public List<String> getAllReasonsByTypeAndTargetId(@PathVariable("report_type") String report_type, @PathVariable("target_id") String target_id) {
+    public ResponseEntity<List<String>> getAllReasonsByTypeAndTargetId(
+            @PathVariable("report_type") String report_type,
+            @PathVariable("target_id") String target_id,
+            Authentication authentication
+    ) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
 
         if (Arrays.stream(ReportTargetType.values()).noneMatch(t -> t.name().equalsIgnoreCase(report_type.toLowerCase()))) {
             throw new IllegalArgumentException("Invalid report type");
@@ -123,7 +229,7 @@ public class AdminController {
             return null;
         }
 
-        return reasons;
+        return ResponseEntity.ok(reasons);
     }
 
     /**
@@ -131,7 +237,17 @@ public class AdminController {
      * @return a ResponseEntity containing a success message with the newly created report's ID
      */
     @PostMapping(path = "reports")
-    public ResponseEntity<String> addReports(@RequestBody Report report) {
+    public ResponseEntity<String> addReports(@RequestBody Report report, Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         report.setCreatedAt(LocalDate.now());
         reportService.addReport(report);
         return ResponseEntity.ok()
@@ -146,10 +262,23 @@ public class AdminController {
      * @return a ResponseEntity containing a success message if the update was successful
      */
     @PutMapping(path = "reports/{report_id}")
-    public ResponseEntity<String> updateReport(@PathVariable("report_id") Long id,
-                                               @RequestParam(required = false) String reviewedBy,
-                                               @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate reviewedAt,
-                                               @RequestParam(required = false) ReportStatus status) {
+    public ResponseEntity<String> updateReport(
+            @PathVariable("report_id") Long id,
+            @RequestParam(required = false) String reviewedBy,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate reviewedAt,
+            @RequestParam(required = false) ReportStatus status,
+            Authentication authentication
+    ) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         reportService.updateReport(id, reviewedBy, reviewedAt, status);
         return ResponseEntity.ok()
                 .body("Report with id " + id + " updated successfuly");
@@ -161,7 +290,17 @@ public class AdminController {
      */
     @Transactional
     @DeleteMapping(path = "reports/{report_id}")
-    public ResponseEntity<String> deleteReport(@PathVariable("report_id") Long id) {
+    public ResponseEntity<String> deleteReport(@PathVariable("report_id") Long id, Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         reportService.deleteReport(id);
         return ResponseEntity.ok()
                 .body("Report with id " + id + " deleted successfully");
@@ -169,16 +308,27 @@ public class AdminController {
 
     @Transactional
     @DeleteMapping(path = "reports/{target_type}/{target_id}")
-    public ResponseEntity<String> deleteReportByTargetIdAndType(@PathVariable("target_type") String targetType, @PathVariable("target_id") String target_id) {
+    public ResponseEntity<String> deleteReportByTargetIdAndType(
+            @PathVariable("target_type") String targetType,
+            @PathVariable("target_id") String target_id,
+            Authentication authentication
+    ) {
 
-        if (Arrays.stream(ReportTargetType.values()).noneMatch(t -> t.name().equalsIgnoreCase(targetType))) {
-            return ResponseEntity.badRequest().body("Invalid target type");
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
 
+        if (Arrays.stream(ReportTargetType.values()).noneMatch(t -> t.name().equalsIgnoreCase(targetType.toLowerCase()))) {
+            return ResponseEntity.badRequest().body("Invalid target type");
+        }
 
         List<Report> reportList = reportService.getReports().stream()
-                .filter(report -> report.getTargetType().name().equalsIgnoreCase(targetType))
+                .filter(report -> report.getTargetType().name().equalsIgnoreCase(targetType.toLowerCase()))
                 .filter(report -> report.getTargetId().equals(target_id)).toList();
 
         if (reportList.isEmpty()) {
@@ -201,8 +351,18 @@ public class AdminController {
      * @return a list of all Ban records
      */
     @GetMapping(path = "bans")
-    public List<Ban> getBans() {
-        return banService.getBans();
+    public ResponseEntity<List<Ban>> getBans(Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
+        return ResponseEntity.ok(banService.getBans());
     }
 
     /**
@@ -211,7 +371,17 @@ public class AdminController {
      * @return a ResponseEntity with a success message
      */
     @PostMapping(path = "bans")
-    public ResponseEntity<String> addBan(@RequestBody Ban ban) {
+    public ResponseEntity<String> addBan(@RequestBody Ban ban, Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         ban.setBeginTime(LocalDate.now());
 
         banService.addBan(ban);
@@ -230,7 +400,19 @@ public class AdminController {
     public ResponseEntity<String> updateBan(
             @PathVariable("ban_id") Long id,
             @RequestParam(required = false) Integer duration,
-            @RequestParam(required = false) String reason) {
+            @RequestParam(required = false) String reason,
+            Authentication authentication
+    ) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         banService.updateBan(id, duration, reason);
         return ResponseEntity.ok()
                 .body("Ban with id " + id + " updated successfully");
@@ -242,7 +424,17 @@ public class AdminController {
      * @return a ResponseEntity with a success message
      */
     @DeleteMapping(path = "bans/{ban_id}")
-    public ResponseEntity<String> deleteBan(@PathVariable("ban_id") Long id) {
+    public ResponseEntity<String> deleteBan(@PathVariable("ban_id") Long id, Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         banService.deleteBan(id);
         return ResponseEntity.ok()
                 .body("Ban with id " + id + " deleted successfully");
