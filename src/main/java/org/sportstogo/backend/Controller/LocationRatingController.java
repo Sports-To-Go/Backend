@@ -13,7 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/location-ratings")
 public class LocationRatingController {
-
     private final LocationRatingService locationRatingService;
 
     public LocationRatingController(LocationRatingService locationRatingService) {

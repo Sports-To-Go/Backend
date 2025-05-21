@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "reservations")
@@ -22,7 +24,7 @@ public class Reservation {
     private Long locationId;
 
     @Column(nullable = false)
-    private Long userId;
+    private String userId;
 
     @Column(nullable = false)
     private Long groupId;
@@ -31,10 +33,13 @@ public class Reservation {
     private String calendarEventId;
 
     @Column(nullable = false)
-    private LocalDateTime startTime;
+    private LocalTime startTime;
 
     @Column(nullable = false)
-    private LocalDateTime endTime;
+    private LocalTime endTime;
+
+    @Column(nullable = false)
+    private LocalDate date;
 
     @Column(nullable = false)
     private Double totalCost;
