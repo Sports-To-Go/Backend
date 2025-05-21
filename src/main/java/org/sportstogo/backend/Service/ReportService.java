@@ -28,7 +28,7 @@ public class ReportService {
     }
 
     @Transactional
-    public void updateReport(Long id, Long reviewedBy, LocalDate reviewedAt, ReportStatus status) {
+    public void updateReport(Long id, String reviewedBy, LocalDate reviewedAt, ReportStatus status) {
 
         Optional<Report> optionalReport = reportRepository.findById(id);
 

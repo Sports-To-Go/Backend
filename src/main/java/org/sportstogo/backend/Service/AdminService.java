@@ -35,18 +35,21 @@ public class AdminService {
         return adminRepository.countUsersRegisteredAfterNative(oneWeekAgo);
     }
 
-
-
     public List<Revenue> getMonthlyRevenue(LocalDate from, LocalDate to) {
         return adminRepository.findRevenueByPeriodTypeAndPeriodStartBetween(
                 PeriodType.MONTHLY, from, to
         );
     }
 
-
     public List<Revenue> getAnnualRevenue(LocalDate from, LocalDate to) {
         return adminRepository.findRevenueByPeriodTypeAndPeriodStartBetween(
                 PeriodType.ANNUAL, from, to
         );
     }
+
+    public boolean isAdmin(String uid) {
+        return adminRepository.findById(uid).isPresent();
+    }
+
+
 }
