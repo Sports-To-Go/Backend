@@ -6,7 +6,6 @@ import org.sportstogo.backend.Models.User;
 import org.sportstogo.backend.Repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-
 @Service
 @AllArgsConstructor
 public class UserService {
@@ -24,4 +23,18 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User updateUser(String uid, User updatedUserData) {
+        User user = getUserByUid(uid); // Căutăm userul în DB
+
+        if (updatedUserData.getDescription() != null) {
+            user.setDescription(updatedUserData.getDescription());
+        }
+
+        // Dacă vei adăuga mai târziu și alte câmpuri editabile:
+        // if (updatedUserData.getDisplayName() != null) {
+        //     user.setDisplayName(updatedUserData.getDisplayName());
+        // }
+
+        return userRepository.save(user); // Salvăm modificările
+    }
 }

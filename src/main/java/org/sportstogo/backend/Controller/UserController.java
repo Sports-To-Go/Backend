@@ -30,4 +30,14 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
+
+    @PutMapping(path="/profile")
+    public ResponseEntity<User> updateUserProfile(
+            Authentication authentication,
+            @RequestBody User updatedUserData) {
+        String uid = (String) authentication.getPrincipal();
+        User updatedUser = userService.updateUser(uid, updatedUserData);
+        return ResponseEntity.ok(updatedUser);
+    }
+
 }
