@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/users/profile/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/users/profile").authenticated()
+
                         // this order FUCKING matters SO FUCKING MUCH DON'T TOUCH THIS OR I'M GOING TO HUNT YOU DOWN
                         .requestMatchers("/social/chat/**").permitAll()
                         .requestMatchers("/social/**").authenticated()
