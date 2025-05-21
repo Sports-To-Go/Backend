@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -165,6 +167,34 @@ public class AdminController {
 
 
         return ResponseEntity.ok(reportService.getReports());
+    }
+
+    @GetMapping(path = "reports/info")
+    public ResponseEntity<Map<Long, Integer>> getReportInfo(Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Map<Long, Integer> reportInfoMap = new HashMap<>();
+
+        reportService.getReports().forEach(report -> {
+            Long id = report.getId();
+
+            if (!reportInfoMap.containsKey(id)) {
+                reportInfoMap.put(id, 1);
+            }
+            else {
+                reportInfoMap.replace(id, reportInfoMap.get(id) + 1);
+            }
+        });
+
+        return ResponseEntity.ok(reportInfoMap);
+
     }
 
     /**
