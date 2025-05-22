@@ -1,6 +1,7 @@
 package org.sportstogo.backend.Controller;
 
 import jakarta.transaction.Transactional;
+import org.sportstogo.backend.DTOs.ReportInfoDTO;
 import org.sportstogo.backend.Models.*;
 import org.sportstogo.backend.Service.AdminService;
 import org.sportstogo.backend.Service.BanService;
@@ -13,10 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -170,32 +168,37 @@ public class AdminController {
     }
 
     @GetMapping(path = "reports/info")
-    public ResponseEntity<Map<Long, Integer>> getReportInfo(Authentication authentication) {
-
+    public ResponseEntity<List<ReportInfoDTO>> getReportInfo(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
 
-        boolean isAdmin = adminService.isAdmin(uid);
-
-        if (!isAdmin) {
+        if (!adminService.isAdmin(uid)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        Map<Long, Integer> reportInfoMap = new HashMap<>();
+        Map<String, ReportInfoDTO> reportMap = new HashMap<>();
 
         reportService.getReports().forEach(report -> {
             Long id = report.getId();
+            ReportTargetType type = report.getTargetType(); // get as String from enum
 
-            if (!reportInfoMap.containsKey(id)) {
-                reportInfoMap.put(id, 1);
-            }
-            else {
-                reportInfoMap.replace(id, reportInfoMap.get(id) + 1);
-            }
+            String key = id + "-" + type;
+
+            reportMap.compute(key, (k, existing) -> {
+                if (existing == null) {
+                    return new ReportInfoDTO(id,1, type);
+                } else {
+                    existing.setReports(existing.getReports() + 1);
+                    return existing;
+                }
+            });
         });
 
-        return ResponseEntity.ok(reportInfoMap);
+        List<ReportInfoDTO> response = new ArrayList<>(reportMap.values());
 
+        return ResponseEntity.ok(response);
     }
+
+
 
     /**
      *
