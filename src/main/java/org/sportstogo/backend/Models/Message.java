@@ -41,6 +41,7 @@ public class Message {
     public MessageDTO toDTO() {
         return new MessageDTO(
                 ID,
+                groupID.getId(),
                 userID.getUid(),
                 content,
                 timeSent.toString()

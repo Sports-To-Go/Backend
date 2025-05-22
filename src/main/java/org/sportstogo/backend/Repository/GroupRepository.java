@@ -36,8 +36,8 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     List<GroupPreviewDTO> findChatPreviewsByUserId(@Param("uid") String uid);
 
     @Query(value = """
-        SELECT g.id AS id, g.name AS name,
-               CAST(COUNT(DISTINCT gm.user_id) AS INT) AS memberCount,
+        SELECT g.id AS id,
+               g.name AS name,
                COALESCE(g.description, 'No description') AS description
         FROM groups g
         LEFT JOIN group_memberships gm ON g.id = gm.group_id
@@ -52,9 +52,8 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
             WHERE user_id = :uid
         )
         GROUP BY g.id, g.name, g.description
-    """, nativeQuery = true)
+   \s""", nativeQuery = true)
     List<GroupPreviewDTO> findGroupRecommendations(@Param("uid") String uid);
-
 
 }
 

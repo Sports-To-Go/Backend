@@ -23,6 +23,14 @@ public class SocialController {
     private final GroupMembershipService groupMembershipService;
     private final JoinRequestService joinRequestService;
 
+    @GetMapping(path="/groups")
+    public ResponseEntity<List<GroupDataDTO>> getGroups(Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        List<GroupDataDTO> groupData = groupService.getGroupData(uid);
+
+        return ResponseEntity.ok(groupData);
+    }
+
     @GetMapping(path="/chat-previews")
     public ResponseEntity<List<GroupPreviewDTO>> getChatPreviews(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
@@ -37,16 +45,6 @@ public class SocialController {
         List<GroupPreviewDTO> groupPreviews = groupService.getGroupRecommendations(uid);
 
         return ResponseEntity.ok(groupPreviews);
-    }
-
-    @GetMapping(path="/group/{groupID}")
-    public ResponseEntity<GroupDataDTO> getGroup(@PathVariable Long groupID, Authentication authentication) {
-        String uid = (String) authentication.getPrincipal();
-        boolean isMember = groupMembershipService.isMemberOfGroup(uid, groupID);
-        if(!isMember) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-        GroupDataDTO groupDataDTO = groupService.getGroupData(groupID);
-        return ResponseEntity.ok(groupDataDTO);
     }
 
     @PostMapping(path="/group")

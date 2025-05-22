@@ -37,10 +37,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             @Param("timestamp") LocalDateTime timestamp
     );
 
-
-    @Query("SELECT MAX(m.ID) FROM Message m WHERE m.groupID.id = :groupId")
-    Long findMaxIdByGroupId(@Param("groupId") Long groupId);
-
     @Modifying
     @Transactional
     @Query("DELETE FROM Message m WHERE m.groupID.id = :groupId")

@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter @Getter
 public class MessageDTO {
     private Long id;
+    private Long groupID;
     private String senderID;
     private String content;
     private String timestamp;

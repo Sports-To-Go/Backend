@@ -50,32 +50,26 @@ public class GroupService {
         return createdGroup;
     }
 
-    public GroupDataDTO getGroupData(Long groupID) {
-        GroupDataDTO groupDataDTO = new GroupDataDTO();
-        Group group = groupRepository.findById(groupID).orElse(null);
-        if (group == null) {
-            return null;
-        }
+    public List<GroupDataDTO> getGroupData(String uid) {
+        List<GroupDataDTO> groupData = groupMembershipRepository.findAllByUserID(uid);
+        for(GroupDataDTO groupDataDTO : groupData) {
+            Long id = groupDataDTO.getId();
 
-        groupDataDTO.setDescription(group.getDescription());
-        groupDataDTO.setName(group.getName());
-
-        // Fetch group members
-        List<GroupMembership> memberships = groupMembershipRepository.findByGroupID(group);
-        List<GroupMemberDTO> groupMembers = memberships.stream()
+            List<GroupMembership> memberships = groupMembershipRepository.findByGroupID(id);
+            List<GroupMemberDTO> groupMembers = memberships.stream()
                 .map(membership -> new GroupMemberDTO(
                         FirebaseTokenService.getDisplayNameFromUid(membership.getUserID().getUid()),
                         membership.getUserID().getUid(),
                         membership.getRole()
                 ))
                 .toList();
-        groupDataDTO.setGroupMembers(groupMembers);
+            groupDataDTO.setGroupMembers(groupMembers);
 
-        List<JoinRequest> joinRequests = joinRequestRepository.findByGroupID(group);
-        List<JoinRequestDTO> joinRequestDTOs = joinRequests.stream().map(JoinRequest::toDTO).toList();
-        groupDataDTO.setJoinRequests(joinRequestDTOs);
-
-        return groupDataDTO;
+            List<JoinRequest> joinRequests = joinRequestRepository.findByGroupID(id);
+            List<JoinRequestDTO> joinRequestDTOs = joinRequests.stream().map(JoinRequest::toDTO).toList();
+            groupDataDTO.setJoinRequests(joinRequestDTOs);
+        }
+        return groupData;
     }
 
     public List<GroupPreviewDTO> getGroupRecommendations(String uid) {
