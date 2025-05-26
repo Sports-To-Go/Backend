@@ -2,7 +2,7 @@ package org.sportstogo.backend.Service;
 
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.*;
-import org.sportstogo.backend.Enums.Role;
+import org.sportstogo.backend.Enums.GroupRole;
 import org.sportstogo.backend.Exceptions.UserNotFoundException;
 import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.GroupMembership;
@@ -43,7 +43,7 @@ public class GroupService {
         GroupMembership groupMembership = new GroupMembership();
         groupMembership.setGroupID(createdGroup);
         groupMembership.setUserID(creator);
-        groupMembership.setRole(Role.admin);
+        groupMembership.setGroupRole(GroupRole.admin);
 
         groupMembershipRepository.save(groupMembership);
 
@@ -60,7 +60,7 @@ public class GroupService {
                 .map(membership -> new GroupMemberDTO(
                         FirebaseTokenService.getDisplayNameFromUid(membership.getUserID().getUid()),
                         membership.getUserID().getUid(),
-                        membership.getRole()
+                        membership.getGroupRole()
                 ))
                 .toList();
             groupDataDTO.setGroupMembers(groupMembers);

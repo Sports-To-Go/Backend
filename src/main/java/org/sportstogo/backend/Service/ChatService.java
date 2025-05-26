@@ -3,6 +3,7 @@ package org.sportstogo.backend.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.MessageDTO;
+import org.sportstogo.backend.Enums.MessageType;
 import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.Models.Message;
 import org.sportstogo.backend.Repository.GroupMembershipRepository;
@@ -72,6 +73,7 @@ public class ChatService {
             message.setUserID(groupMembership.getUserID());
             message.setContent(incomingMessage.getContent());
             message.setTimeSent(LocalDateTime.now());
+            message.setType(MessageType.TEXT);
 
             // Save message
             Long id = messageRepository.insert(groupId, senderId, message.getContent(), message.getTimeSent());

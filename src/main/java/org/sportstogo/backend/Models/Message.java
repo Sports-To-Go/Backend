@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.sportstogo.backend.DTOs.MessageDTO;
+import org.sportstogo.backend.Enums.MessageType;
 import org.sportstogo.backend.Service.FirebaseTokenService;
 import org.sportstogo.backend.idModels.MessageID;
 
@@ -32,6 +33,10 @@ public class Message {
     @JoinColumn(name = "user_id", referencedColumnName = "uid", nullable = false)
     private User userID;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MessageType type = MessageType.TEXT;
+
     @Column(nullable = false)
     private String content;
 
@@ -44,7 +49,8 @@ public class Message {
                 groupID.getId(),
                 userID.getUid(),
                 content,
-                timeSent.toString()
+                timeSent.toString(),
+                type
         );
     }
 }

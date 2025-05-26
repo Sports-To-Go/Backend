@@ -52,5 +52,15 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
                             @Param("content") String content,
                             @Param("timeSent") LocalDateTime timeSent);
 
+    @Query(value = """
+    INSERT INTO messages (id, group_id, user_id, content, time_sent, type)
+    VALUES (nextval('message_id_seq'), :groupId, :userId, :content, :timeSent, :type)
+    RETURNING id
+""", nativeQuery = true)
+    Long insert(@Param("groupId") Long groupId,
+                @Param("userId") String userId,
+                @Param("content") String content,
+                @Param("timeSent") LocalDateTime timeSent,
+                @Param("type") String type);
 
 }
