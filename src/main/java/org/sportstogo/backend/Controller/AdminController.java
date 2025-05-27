@@ -3,9 +3,11 @@ package org.sportstogo.backend.Controller;
 import jakarta.transaction.Transactional;
 import org.sportstogo.backend.Enums.ReportStatus;
 import org.sportstogo.backend.Enums.ReportTargetType;
+import org.sportstogo.backend.DTOs.ReportInfoDTO;
 import org.sportstogo.backend.Models.*;
 import org.sportstogo.backend.Service.AdminService;
 import org.sportstogo.backend.Service.BanService;
+import org.sportstogo.backend.Service.BugService;
 import org.sportstogo.backend.Service.ReportService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -14,8 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,11 +26,12 @@ public class AdminController {
     private final AdminService adminService;
     private final ReportService reportService;
     private final BanService banService;
-
-    public AdminController(AdminService adminService, ReportService reportService, BanService banService) {
+    private final BugService bugService;
+    public AdminController(AdminService adminService, ReportService reportService, BanService banService, BugService bugService) {
         this.adminService = adminService;
         this.reportService = reportService;
         this.banService = banService;
+        this.bugService = bugService;
     }
 
     @GetMapping(path = "recent-users")
@@ -167,6 +169,39 @@ public class AdminController {
 
         return ResponseEntity.ok(reportService.getReports());
     }
+
+    @GetMapping(path = "reports/info")
+    public ResponseEntity<List<ReportInfoDTO>> getReportInfo(Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+
+        if (!adminService.isAdmin(uid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Map<String, ReportInfoDTO> reportMap = new HashMap<>();
+
+        reportService.getReports().forEach(report -> {
+            Long id = report.getId();
+            ReportTargetType type = report.getTargetType(); // get as String from enum
+
+            String key = id + "-" + type;
+
+            reportMap.compute(key, (k, existing) -> {
+                if (existing == null) {
+                    return new ReportInfoDTO(id,1, type);
+                } else {
+                    existing.setReports(existing.getReports() + 1);
+                    return existing;
+                }
+            });
+        });
+
+        List<ReportInfoDTO> response = new ArrayList<>(reportMap.values());
+
+        return ResponseEntity.ok(response);
+    }
+
+
 
     /**
      *
@@ -439,6 +474,29 @@ public class AdminController {
         banService.deleteBan(id);
         return ResponseEntity.ok()
                 .body("Ban with id " + id + " deleted successfully");
+    }
+
+    //Bugs
+
+    @PostMapping("/bug")
+    public ResponseEntity<Bug> addBug(@RequestBody Bug bug) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(bugService.addBug(bug));
+    }
+
+    @PutMapping("/bug/{id}/resolve")
+    public ResponseEntity<Bug> resolveBug(@PathVariable Long id) {
+        return ResponseEntity.ok(bugService.resolveBug(id));
+    }
+
+    @GetMapping("/bug/getAll")
+    public ResponseEntity<List<Bug>> getUnresolvedBugs(@RequestParam(defaultValue = "false") boolean status) {
+        if (status) {
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build();
+        }
+        List<Bug> bugs = bugService.getUnresolvedBugs();
+        return bugs.isEmpty()
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.ok(bugs);
     }
 
 }
