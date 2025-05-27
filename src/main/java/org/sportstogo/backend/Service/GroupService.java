@@ -24,10 +24,6 @@ public class GroupService {
     private final UserRepository userRepository;
     private final JoinRequestRepository joinRequestRepository;
 
-    public List<GroupPreviewDTO> getChatPreviews(String uid) {
-        return groupRepository.findChatPreviewsByUserId(uid);
-    }
-
     public Group createGroup(GroupCreationDTO groupCreationDTO, String uid) {
         User creator = userRepository.findById(uid).orElse(null);
         if(creator == null) {

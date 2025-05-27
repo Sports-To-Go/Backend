@@ -1,5 +1,7 @@
 package org.sportstogo.backend.Models;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,14 +45,30 @@ public class Message {
     @Column(nullable = false)
     private LocalDateTime timeSent;
 
+    @Column(name = "system_event")
+    private String systemEvent; // nullable
+
+    @Column(name = "meta_data", columnDefinition = "TEXT")
+    private String metaData; // JSON string, nullable
+
     public MessageDTO toDTO() {
-        return new MessageDTO(
-                ID,
-                groupID.getId(),
-                userID.getUid(),
-                content,
-                timeSent.toString(),
-                type
-        );
+        MessageDTO dto = new MessageDTO();
+        dto.setId(ID);
+        dto.setGroupID(groupID.getId());
+        dto.setContent(content);
+        dto.setSenderID(userID.getUid());
+        dto.setType(type);
+        dto.setTimestamp(timeSent.toString());
+        dto.setSystemEvent(this.systemEvent);
+        if (this.metaData != null) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                dto.setMeta(objectMapper.readValue(this.metaData, new TypeReference<>() {}));
+            } catch (Exception e) {
+                dto.setMeta(null);
+            }
+        }
+
+        return dto;
     }
 }

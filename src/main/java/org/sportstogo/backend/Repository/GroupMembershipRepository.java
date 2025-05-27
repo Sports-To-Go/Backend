@@ -39,12 +39,4 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
     WHERE gm.user_id = :uid
     """, nativeQuery = true)
     List<GroupDataDTO> findAllByUserID(@Param("uid") String uid);
-
-    @Query(value = """
-    SELECT
-        g.id
-    FROM group_memberships gm JOIN groups g ON gm.group_id = g.id
-    WHERE gm.user_id = :uid
-    """, nativeQuery = true)
-    List<Long> findAllGroupIdsByUserID(@Param("uid") String uid);
 }

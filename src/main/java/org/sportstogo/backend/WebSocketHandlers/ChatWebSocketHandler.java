@@ -30,7 +30,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             // Verify the Firebase JWT
             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(protocolHeader);
             String uid = decodedToken.getUid();
-            System.out.println("Authenticated user: " + uid);
+//            System.out.println("Authenticated user: " + uid);
 
             // Save user/session mapping
             session.getAttributes().put("uid", uid);
@@ -38,7 +38,7 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             // Add user session to the service
             chatService.addUserSession(uid, session);
 
-            System.out.println("User " + uid + " connected. Active sessions: " + chatService.getActiveSessionCount());
+//            System.out.println("User " + uid + " connected. Active sessions: " + chatService.getActiveSessionCount());
 
         } catch (Exception e) {
             System.out.println("Auth error: " + e.getMessage());
@@ -65,8 +65,8 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String uid = (String) session.getAttributes().get("uid");
         if (uid != null) {
             chatService.removeUserSession(uid);
-            System.out.println("User " + uid + " disconnected. Reason: " + status.getReason() +
-                    ". Active sessions: " + chatService.getActiveSessionCount());
+//            System.out.println("User " + uid + " disconnected. Reason: " + status.getReason() +
+//                    ". Active sessions: " + chatService.getActiveSessionCount());
         }
     }
 

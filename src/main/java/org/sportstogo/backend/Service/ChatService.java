@@ -77,8 +77,8 @@ public class ChatService {
 
             // Save message
             Long id = messageRepository.insert(groupId, senderId, message.getContent(), message.getTimeSent(), message.getType().ordinal());
-            System.out.println("Message processing time: " +
-                    LocalDateTime.now().minusNanos(now.getNano()).getNano() + " nanoseconds");
+//            System.out.println("Message processing time: " +
+//                    LocalDateTime.now().minusNanos(now.getNano()).getNano() + " nanoseconds");
 
             // Convert to DTO for broadcasting
             message.setID(id);
@@ -122,18 +122,26 @@ public class ChatService {
         }
     }
 
-    /**
-     * Check if user is member of group
-     */
-    public boolean isUserMemberOfGroup(String uid, Long groupId) {
-        return groupMembershipRepository.existsByUserIDAndGroupID(uid, groupId);
-    }
+    public void createSystemMessage(Long groupId, String senderUid, String eventType, Map<String, Object> meta) {
+        try {
+            Message message = new Message();
+            message.setGroupID(groupRepository.getReferenceById(groupId));
+            message.setUserID(userRepository.getReferenceById(senderUid));
+            message.setType(MessageType.SYSTEM);
+            message.setSystemEvent(eventType);
+            message.setMetaData(new ObjectMapper().writeValueAsString(meta));
+            message.setContent(""); // unused for system messages
+            message.setTimeSent(LocalDateTime.now());
 
-    /**
-     * Get user session for testing/debugging purposes
-     */
-    public WebSocketSession getUserSession(String userId) {
-        return userSessions.get(userId);
+            message = messageRepository.save(message);
+
+            // convert to DTO
+            MessageDTO dto = message.toDTO();
+            String json = new ObjectMapper().writeValueAsString(dto);
+            broadcastToGroupMembers(groupId, new TextMessage(json));
+        } catch (Exception e) {
+            System.err.println("Failed to create system message: " + e.getMessage());
+        }
     }
 
     /**
