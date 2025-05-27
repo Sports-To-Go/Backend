@@ -2,7 +2,7 @@ package org.sportstogo.backend.Controller;
 
 
 import org.sportstogo.backend.Models.Location;
-import org.sportstogo.backend.Models.Sport;
+import org.sportstogo.backend.Enums.Sport;
 import org.sportstogo.backend.Service.LocationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

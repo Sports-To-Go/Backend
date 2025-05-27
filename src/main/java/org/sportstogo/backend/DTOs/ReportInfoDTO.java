@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.sportstogo.backend.Models.ReportTargetType;
+import org.sportstogo.backend.Enums.ReportTargetType;
 
 @AllArgsConstructor
 @NoArgsConstructor

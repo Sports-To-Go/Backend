@@ -11,6 +11,5 @@ import lombok.Setter;
 public class GroupPreviewDTO {
     private Long id;
     private String name;
-    private int memberCount;
     private String description;
 }

@@ -1,6 +1,5 @@
 package org.sportstogo.backend.Repository;
 
-import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.JoinRequest;
 import org.sportstogo.backend.idModels.GroupMemberID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,8 +11,8 @@ import java.util.List;
 
 @Repository
 public interface JoinRequestRepository extends JpaRepository<JoinRequest, GroupMemberID> {
-    @Query("SELECT jr FROM JoinRequest jr WHERE jr.groupID = :group")
-    List<JoinRequest> findByGroupID(@Param("group") Group group);
+    @Query("SELECT jr FROM JoinRequest jr WHERE jr.groupID.id = :id")
+    List<JoinRequest> findByGroupID(@Param("id") Long id);
 
     @Query("SELECT j FROM JoinRequest j WHERE j.groupID.id = :groupId AND j.userID.uid = :id")
     JoinRequest findByGroupIDAndUserID(Long groupId, String id);

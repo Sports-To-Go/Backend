@@ -1,5 +1,6 @@
 package org.sportstogo.backend.Repository;
 
+import org.sportstogo.backend.DTOs.GroupDataDTO;
 import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.idModels.GroupMemberID;
@@ -15,12 +16,27 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
     @Query("SELECT COUNT(gm) > 0 FROM GroupMembership gm WHERE gm.userID.uid = :userId AND gm.groupID.id = :groupId")
     boolean existsByUserIDAndGroupID(@Param("userId") String userId, @Param("groupId") Long groupId);
 
-    @Query("SELECT gm FROM GroupMembership gm WHERE gm.groupID = :group")
-    List<GroupMembership> findByGroupID(@Param("group") Group group);
+    @Query("""
+        SELECT gm
+        FROM GroupMembership gm
+        WHERE gm.groupID.id = :id
+    """)
+    List<GroupMembership> findByGroupID(@Param("id") Long id);
+
 
     @Query("SELECT gm FROM GroupMembership gm WHERE gm.userID.uid = :userId AND gm.groupID.id = :groupId")
     GroupMembership findByUserIDAndGroupID(@Param("userId") String userId, @Param("groupId") Long groupId);
 
     @Query("SELECT COUNT(gm) > 0 FROM GroupMembership gm WHERE gm.groupID.id = :groupId")
     boolean existsByGroupID(@Param("groupId") Long groupId);
+
+    @Query(value = """
+    SELECT
+        g.id AS id,
+        g.name AS name,
+        g.description AS description
+    FROM group_memberships gm JOIN groups g ON gm.group_id = g.id
+    WHERE gm.user_id = :uid
+    """, nativeQuery = true)
+    List<GroupDataDTO> findAllByUserID(@Param("uid") String uid);
 }

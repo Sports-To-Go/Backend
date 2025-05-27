@@ -45,7 +45,7 @@ public class Reservation {
     private Double totalCost;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private PaymentStatus paymentStatus;
 
     @Column(nullable = false, updatable = false)

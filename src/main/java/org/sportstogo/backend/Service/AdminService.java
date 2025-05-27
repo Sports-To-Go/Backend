@@ -1,9 +1,9 @@
 package org.sportstogo.backend.Service;
 
 import lombok.AllArgsConstructor;
+import org.sportstogo.backend.Enums.PeriodType;
 import org.sportstogo.backend.Models.User;
 import org.sportstogo.backend.Models.Revenue;
-import org.sportstogo.backend.Models.Revenue.PeriodType;
 import org.sportstogo.backend.Repository.AdminRepository;
 import org.springframework.stereotype.Service;
 

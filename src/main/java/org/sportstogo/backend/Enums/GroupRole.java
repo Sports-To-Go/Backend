@@ -1,6 +1,6 @@
 package org.sportstogo.backend.Enums;
 
-public enum Role {
+public enum GroupRole {
     member,
     co_admin,
     admin,
