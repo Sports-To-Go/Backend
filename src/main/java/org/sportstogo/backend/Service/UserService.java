@@ -20,6 +20,7 @@ public class UserService {
         User user = new User();
         user.setUid(uid);
         user.setDescription("");
+        user.setAdmin(false);
         return userRepository.save(user);
     }
 
