@@ -33,11 +33,11 @@ public class Message {
     @JoinColumn(name = "user_id", referencedColumnName = "uid", nullable = false)
     private User userID;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
     private MessageType type = MessageType.TEXT;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "text")
     private String content;
 
     @Column(nullable = false)

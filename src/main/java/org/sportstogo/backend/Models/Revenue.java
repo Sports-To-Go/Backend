@@ -1,4 +1,3 @@
-// src/main/java/org/sportstogo/backend/Models/Revenue.java
 package org.sportstogo.backend.Models;
 
 import jakarta.persistence.*;
@@ -6,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.sportstogo.backend.Enums.PeriodType;
 
 import java.time.LocalDate;
 
@@ -23,14 +23,9 @@ public class Revenue {
     private LocalDate periodStart;
 
     @Column(name = "period_type", nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private PeriodType periodType;
 
     @Column(name = "total_amount", nullable = false)
     private Double totalAmount;
-
-
-    public enum PeriodType {
-        DAILY, MONTHLY, ANNUAL
-    }
 }

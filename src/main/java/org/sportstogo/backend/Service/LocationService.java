@@ -3,7 +3,7 @@ package org.sportstogo.backend.Service;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.Models.Location;
-import org.sportstogo.backend.Models.Sport;
+import org.sportstogo.backend.Enums.Sport;
 import org.sportstogo.backend.Repository.LocationRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

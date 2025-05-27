@@ -7,11 +7,13 @@ import org.sportstogo.backend.Models.JoinRequest;
 import org.sportstogo.backend.Service.GroupMembershipService;
 import org.sportstogo.backend.Service.GroupService;
 import org.sportstogo.backend.Service.JoinRequestService;
+import org.sportstogo.backend.Service.MessageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -22,6 +24,7 @@ public class SocialController {
     private final GroupService groupService;
     private final GroupMembershipService groupMembershipService;
     private final JoinRequestService joinRequestService;
+    private final MessageService messageService;
 
     @GetMapping(path="/groups")
     public ResponseEntity<List<GroupDataDTO>> getGroups(Authentication authentication) {
@@ -53,6 +56,18 @@ public class SocialController {
         Group createdGroup = groupService.createGroup(groupCreationDTO, uid);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdGroup);
     }
+
+    @GetMapping("/group/{groupId}/messages")
+    public ResponseEntity<List<MessageDTO>> getGroupMessages(@PathVariable Long groupId,
+                                                             @RequestParam(name = "before") String beforeTimestamp,
+                                                             Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        // Optional: check membership before fetching messages
+        LocalDateTime before = LocalDateTime.parse(beforeTimestamp);
+        List<MessageDTO> messages = messageService.getMessagesForGroup(groupId, before);
+        return ResponseEntity.ok(messages);
+    }
+
 
     @PostMapping("/join-request/{groupId}")
     public ResponseEntity<JoinRequest> createJoinRequest(@PathVariable Long groupId, Authentication authentication) {

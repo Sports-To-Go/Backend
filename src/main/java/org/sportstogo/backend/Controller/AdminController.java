@@ -1,6 +1,8 @@
 package org.sportstogo.backend.Controller;
 
 import jakarta.transaction.Transactional;
+import org.sportstogo.backend.Enums.ReportStatus;
+import org.sportstogo.backend.Enums.ReportTargetType;
 import org.sportstogo.backend.Models.*;
 import org.sportstogo.backend.Service.AdminService;
 import org.sportstogo.backend.Service.BanService;
@@ -8,7 +10,6 @@ import org.sportstogo.backend.Service.ReportService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 

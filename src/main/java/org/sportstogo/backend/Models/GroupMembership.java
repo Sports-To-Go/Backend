@@ -28,6 +28,7 @@ public class GroupMembership {
     @JoinColumn(name = "user_id", referencedColumnName = "uid", nullable = false)
     private User userID;
 
+    @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
     private GroupRole groupRole = GroupRole.member;
 

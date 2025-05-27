@@ -1,6 +1,7 @@
 package org.sportstogo.backend.Repository;
 
 import jakarta.transaction.Transactional;
+import org.hibernate.type.descriptor.jdbc.SmallIntJdbcType;
 import org.sportstogo.backend.Models.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -43,16 +44,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     void deleteAllByGroupId(@Param("groupId") Long groupId);
 
     @Query(value = """
-    INSERT INTO messages (id, group_id, user_id, content, time_sent)
-    VALUES (nextval('message_id_seq'), :groupId, :userId, :content, :timeSent)
-    RETURNING id
-    """, nativeQuery = true)
-    Long insert(@Param("groupId") Long groupId,
-                            @Param("userId") String userId,
-                            @Param("content") String content,
-                            @Param("timeSent") LocalDateTime timeSent);
-
-    @Query(value = """
     INSERT INTO messages (id, group_id, user_id, content, time_sent, type)
     VALUES (nextval('message_id_seq'), :groupId, :userId, :content, :timeSent, :type)
     RETURNING id
@@ -61,6 +52,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
                 @Param("userId") String userId,
                 @Param("content") String content,
                 @Param("timeSent") LocalDateTime timeSent,
-                @Param("type") String type);
+                @Param("type") Integer type);
 
 }

@@ -76,7 +76,7 @@ public class ChatService {
             message.setType(MessageType.TEXT);
 
             // Save message
-            Long id = messageRepository.insert(groupId, senderId, message.getContent(), message.getTimeSent());
+            Long id = messageRepository.insert(groupId, senderId, message.getContent(), message.getTimeSent(), message.getType().ordinal());
             System.out.println("Message processing time: " +
                     LocalDateTime.now().minusNanos(now.getNano()).getNano() + " nanoseconds");
 

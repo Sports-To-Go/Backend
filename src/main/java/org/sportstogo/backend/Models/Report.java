@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.sportstogo.backend.Enums.ReportStatus;
+import org.sportstogo.backend.Enums.ReportTargetType;
 
 import java.time.LocalDate;
 
@@ -22,6 +24,7 @@ public class Report {
     @Column(nullable = false)
     private String reportedBy;
 
+    @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
     private ReportTargetType targetType;
 
