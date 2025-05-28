@@ -122,4 +122,19 @@ public class LocationService {
         return ResponseEntity.status(HttpStatus.OK).body("Location successfully updated");
     }
 
+    /**
+     * Fetches the name of a location by its ID.
+     *
+     * @param id the ID of the location
+     * @return the location’s name
+     * @throws IllegalArgumentException if no location with the given ID exists
+     */
+    public String getLocationNameById(Long id) {
+        return locationRepository.findById(id)
+                .map(Location::getName)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Location with id " + id + " not found")
+                );
+
+    }
 }

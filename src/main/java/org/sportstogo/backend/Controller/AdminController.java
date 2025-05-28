@@ -1,7 +1,11 @@
 package org.sportstogo.backend.Controller;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.UserRecord;
 import jakarta.transaction.Transactional;
 
+import org.sportstogo.backend.DTOs.NameDTO;
 import org.sportstogo.backend.DTOs.ReportDTO;
 
 import org.sportstogo.backend.Enums.ReportStatus;
@@ -9,10 +13,7 @@ import org.sportstogo.backend.Enums.ReportTargetType;
 
 import org.sportstogo.backend.DTOs.ReportInfoDTO;
 import org.sportstogo.backend.Models.*;
-import org.sportstogo.backend.Service.AdminService;
-import org.sportstogo.backend.Service.BanService;
-import org.sportstogo.backend.Service.BugService;
-import org.sportstogo.backend.Service.ReportService;
+import org.sportstogo.backend.Service.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,11 +32,14 @@ public class AdminController {
     private final ReportService reportService;
     private final BanService banService;
     private final BugService bugService;
-    public AdminController(AdminService adminService, ReportService reportService, BanService banService, BugService bugService) {
+    private final LocationService locationService;
+
+    public AdminController(AdminService adminService, ReportService reportService, BanService banService, BugService bugService, LocationService locationService) {
         this.adminService = adminService;
         this.reportService = reportService;
         this.banService = banService;
         this.bugService = bugService;
+        this.locationService = locationService;
     }
 
     @GetMapping(path = "recent-users")
@@ -140,7 +144,7 @@ public class AdminController {
     @GetMapping("/revenue/monthly")
     public ResponseEntity<List<Revenue>> getMonthlyRevenue(
             @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam("to")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             Authentication authentication
     ) {
 
@@ -166,7 +170,7 @@ public class AdminController {
     @GetMapping("/revenue/annual")
     public ResponseEntity<List<Revenue>> getAnnualRevenue(
             @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam("to")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             Authentication authentication
     ) {
 
@@ -186,11 +190,9 @@ public class AdminController {
     }
 
 
-
-
     //reports
+
     /**
-     *
      * @return returns all reports
      */
     @GetMapping(path = "reports")
@@ -226,7 +228,7 @@ public class AdminController {
 
             reportMap.compute(key, (k, existing) -> {
                 if (existing == null) {
-                    return new ReportInfoDTO(id,1, type);
+                    return new ReportInfoDTO(id, 1, type);
                 } else {
                     existing.setReports(existing.getReports() + 1);
                     return existing;
@@ -240,9 +242,7 @@ public class AdminController {
     }
 
 
-
     /**
-     *
      * @param report_type type of reports wanted to be returned
      * @return a list of all reports of the specified type
      * @throws IllegalArgumentException if the report type specified is invalid
@@ -267,9 +267,9 @@ public class AdminController {
                         .getReports()
                         .stream()
                         .filter(report -> report
-                                        .getTargetType()
-                                        .toString()
-                                        .equalsIgnoreCase(report_type.toLowerCase()))
+                                .getTargetType()
+                                .toString()
+                                .equalsIgnoreCase(report_type.toLowerCase()))
                         .collect(Collectors.toList()));
     }
 
@@ -329,10 +329,10 @@ public class AdminController {
     }
 
     /**
-     * @param id the ID of the report to update
+     * @param id         the ID of the report to update
      * @param reviewedBy optional ID of the admin reviewing the report
      * @param reviewedAt optional date when the report was reviewed
-     * @param status optional new status of the report
+     * @param status     optional new status of the report
      * @return a ResponseEntity containing a success message if the update was successful
      */
     @PutMapping(path = "reports/{report_id}")
@@ -417,11 +417,11 @@ public class AdminController {
     }
 
 
-
-
     //bans
+
     /**
      * Retrieves all bans in the system.
+     *
      * @return a list of all Ban records
      */
     @GetMapping(path = "bans")
@@ -441,6 +441,7 @@ public class AdminController {
 
     /**
      * Creates a new ban. Automatically sets the start time to today and computes the end date based on the duration.
+     *
      * @param ban the Ban object to be created
      * @return a ResponseEntity with a success message
      */
@@ -465,9 +466,10 @@ public class AdminController {
 
     /**
      * Updates an existing ban's duration and/or reason.
-     * @param id the ID of the ban to update
+     *
+     * @param id       the ID of the ban to update
      * @param duration optional new duration in days
-     * @param reason optional new reason for the ban
+     * @param reason   optional new reason for the ban
      * @return a ResponseEntity with a success message
      */
     @PutMapping(path = "bans/{ban_id}")
@@ -494,6 +496,7 @@ public class AdminController {
 
     /**
      * Deletes a ban by its ID.
+     *
      * @param id the ID of the ban to delete
      * @return a ResponseEntity with a success message
      */
@@ -537,4 +540,28 @@ public class AdminController {
                 : ResponseEntity.ok(bugs);
     }
 
+    @GetMapping("/{id}/{type}/name")
+    public ResponseEntity<NameDTO> getDisplayName(
+            @PathVariable("id") String id,
+            @PathVariable("type") ReportTargetType type,
+            Authentication authentication
+    ){
+        String requester = (String) authentication.getPrincipal();
+        if (!adminService.isAdmin(requester)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        try{
+            String name = "";
+            if(type == ReportTargetType.User){
+                UserRecord userRecord = FirebaseAuth.getInstance().getUser(id);
+                name = userRecord.getDisplayName();
+            }else if(type == ReportTargetType.Location){
+                name = locationService.getLocationNameById(Long.parseLong(id));
+            }
+            return ResponseEntity.ok(new NameDTO(name));
+        }catch (FirebaseAuthException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 }
