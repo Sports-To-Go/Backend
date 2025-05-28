@@ -32,9 +32,11 @@ public class Group {
 
     @Column(nullable = false)
     private LocalDate createdDate;
+
     @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
-    private Theme theme;
+    private Theme theme = Theme.DEFAULT;
+
     @PrePersist
     protected void onCreate() {
         this.createdDate = LocalDate.now();
