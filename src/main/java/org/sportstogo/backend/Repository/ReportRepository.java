@@ -4,4 +4,5 @@ import org.sportstogo.backend.Models.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReportRepository extends JpaRepository<Report,Long> {
+    void deleteByTargetId(String targetId);
 }

@@ -11,7 +11,7 @@ import org.sportstogo.backend.Enums.ReportTargetType;
 @Setter
 @Getter
 public class ReportInfoDTO {
-    private Long id;
+    private String id;
     private Integer reports;
     private ReportTargetType type;
 }

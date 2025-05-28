@@ -1,8 +1,12 @@
 package org.sportstogo.backend.Controller;
 
 import jakarta.transaction.Transactional;
+
+import org.sportstogo.backend.DTOs.ReportDTO;
+
 import org.sportstogo.backend.Enums.ReportStatus;
 import org.sportstogo.backend.Enums.ReportTargetType;
+
 import org.sportstogo.backend.DTOs.ReportInfoDTO;
 import org.sportstogo.backend.Models.*;
 import org.sportstogo.backend.Service.AdminService;
@@ -68,6 +72,22 @@ public class AdminController {
         return ResponseEntity.ok(locationCount);
     }
 
+    @GetMapping("/user/count")
+    public ResponseEntity<Long> getUsersCount(Authentication authentication) {
+
+        String uid = (String) authentication.getPrincipal();
+
+        boolean isAdmin = adminService.isAdmin(uid);
+
+        if (!isAdmin) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
+        long locationCount = adminService.getUsersCount();
+        return ResponseEntity.ok(locationCount);
+    }
+
     @GetMapping("/reservations/count")
     public ResponseEntity<Long> getReservationCount(Authentication authentication) {
 
@@ -100,6 +120,24 @@ public class AdminController {
         return ResponseEntity.ok(count);
     }
 
+
+    @PostMapping("/revenue")
+    public ResponseEntity<Revenue> addRevenue(
+            @RequestBody Revenue revenue,
+            Authentication authentication
+    ) {
+        String uid = (String) authentication.getPrincipal();
+
+        if (!adminService.isAdmin(uid)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        Revenue saved = adminService.saveRevenue(revenue);
+        return ResponseEntity.ok(saved);
+    }
+
+
+    @GetMapping("/revenue/monthly")
     public ResponseEntity<List<Revenue>> getMonthlyRevenue(
             @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam("to")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
@@ -181,7 +219,7 @@ public class AdminController {
         Map<String, ReportInfoDTO> reportMap = new HashMap<>();
 
         reportService.getReports().forEach(report -> {
-            Long id = report.getId();
+            String id = report.getTargetId();
             ReportTargetType type = report.getTargetType(); // get as String from enum
 
             String key = id + "-" + type;
@@ -236,36 +274,36 @@ public class AdminController {
     }
 
     @GetMapping(path = "reports/{report_type}/{target_id}/messages")
-    public ResponseEntity<List<String>> getAllReasonsByTypeAndTargetId(
-            @PathVariable("report_type") String report_type,
-            @PathVariable("target_id") String target_id,
+    public ResponseEntity<List<ReportDTO>> getAllByTypeAndTargetId(
+            @PathVariable("report_type") String reportType,
+            @PathVariable("target_id") String targetId,
             Authentication authentication
     ) {
-
         String uid = (String) authentication.getPrincipal();
-
-        boolean isAdmin = adminService.isAdmin(uid);
-
-        if (!isAdmin) {
+        if (!adminService.isAdmin(uid)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-
-        if (Arrays.stream(ReportTargetType.values()).noneMatch(t -> t.name().equalsIgnoreCase(report_type.toLowerCase()))) {
-            throw new IllegalArgumentException("Invalid report type");
+        // Validate reportType against enum names (ignore case)
+        boolean validType = Arrays.stream(ReportTargetType.values())
+                .anyMatch(t -> t.name().equalsIgnoreCase(reportType));
+        if (!validType) {
+            throw new IllegalArgumentException("Invalid report type: " + reportType);
         }
 
-        List<String> reasons = reportService.getReports().stream()
-                .filter(report -> report.getTargetType().name().equalsIgnoreCase(report_type.toLowerCase()))
-                .filter(report -> report.getTargetId().equals(target_id))
-                .map(Report::getReason)
+        // Filter, map to DTO, collect
+        List<ReportDTO> dtos = reportService.getReports().stream()
+                .filter(r -> r.getTargetType().name().equalsIgnoreCase(reportType))
+                .filter(r -> r.getTargetId().equals(targetId))
+                .map(r -> new ReportDTO(
+                        r.getReportedBy(),
+                        r.getReason(),
+                        r.getCreatedAt()
+                ))
                 .collect(Collectors.toList());
 
-        if (reasons.isEmpty()) {
-            return null;
-        }
-
-        return ResponseEntity.ok(reasons);
+        // Always return 200 OK with list (empty if no matches)
+        return ResponseEntity.ok(dtos);
     }
 
     /**
