@@ -39,7 +39,7 @@ public class Message {
     @Column(nullable = false)
     private MessageType type = MessageType.TEXT;
 
-    @Column(nullable = false, columnDefinition = "text")
+    @Column(nullable = true, columnDefinition = "text")
     private String content;
 
     @Column(nullable = false)

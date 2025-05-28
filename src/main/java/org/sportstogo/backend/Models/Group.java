@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.sportstogo.backend.Enums.Theme;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -31,6 +32,10 @@ public class Group {
 
     @Column(nullable = false)
     private LocalDate createdDate;
+
+    @Enumerated(EnumType.ORDINAL)
+    @Column(nullable = false)
+    private Theme theme = Theme.DEFAULT;
 
     @PrePersist
     protected void onCreate() {

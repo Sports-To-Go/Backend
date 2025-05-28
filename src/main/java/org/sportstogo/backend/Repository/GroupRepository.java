@@ -1,11 +1,14 @@
 package org.sportstogo.backend.Repository;
 
 import org.sportstogo.backend.DTOs.GroupPreviewDTO;
+import org.sportstogo.backend.Enums.Theme;
 import org.sportstogo.backend.Models.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -31,5 +34,13 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
    \s""", nativeQuery = true)
     List<GroupPreviewDTO> findGroupRecommendations(@Param("uid") String uid);
 
+    @Modifying
+    @Transactional
+    @Query(value = """
+        UPDATE groups
+        SET theme = :theme
+        WHERE id = :groupId
+    """, nativeQuery = true)
+    int updateGroupTheme(@Param("groupId") Long groupId, @Param("theme") Theme theme);
 }
 

@@ -34,7 +34,8 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
     SELECT
         g.id AS id,
         g.name AS name,
-        g.description AS description
+        g.description AS description,
+        g.theme as theme
     FROM group_memberships gm JOIN groups g ON gm.group_id = g.id
     WHERE gm.user_id = :uid
     """, nativeQuery = true)
