@@ -27,6 +27,9 @@ public interface AdminRepository extends JpaRepository<User, String> {
     @Query("SELECT COUNT(r) FROM Reservation r")
     long countReservations();
 
+    @Query("SELECT COUNT(u) from User u")
+    long countUsers();
+
     @Query(
             value = "SELECT COUNT(*) " +
                     "FROM users u " +
