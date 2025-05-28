@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.sportstogo.backend.Enums.Role;
+import org.sportstogo.backend.Enums.GroupRole;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,6 +12,6 @@ import org.sportstogo.backend.Enums.Role;
 public class GroupMemberDTO {
     private String displayName;
     private String id;
-    private Role role;
+    private GroupRole groupRole;
 //    private String photoUrl;
 }

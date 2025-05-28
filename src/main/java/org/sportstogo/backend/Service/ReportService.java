@@ -2,10 +2,8 @@ package org.sportstogo.backend.Service;
 
 
 import lombok.AllArgsConstructor;
-import org.sportstogo.backend.Models.Group;
-import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.Models.Report;
-import org.sportstogo.backend.Models.ReportStatus;
+import org.sportstogo.backend.Enums.ReportStatus;
 import org.sportstogo.backend.Repository.ReportRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

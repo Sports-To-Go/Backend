@@ -1,7 +1,12 @@
 package org.sportstogo.backend.Controller;
 
 import jakarta.transaction.Transactional;
+
 import org.sportstogo.backend.DTOs.ReportDTO;
+
+import org.sportstogo.backend.Enums.ReportStatus;
+import org.sportstogo.backend.Enums.ReportTargetType;
+
 import org.sportstogo.backend.DTOs.ReportInfoDTO;
 import org.sportstogo.backend.Models.*;
 import org.sportstogo.backend.Service.AdminService;

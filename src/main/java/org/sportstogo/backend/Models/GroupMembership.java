@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.sportstogo.backend.Enums.Role;
+import org.sportstogo.backend.Enums.GroupRole;
 import org.sportstogo.backend.idModels.GroupMemberID;
 
 import java.time.LocalDateTime;
@@ -28,8 +28,9 @@ public class GroupMembership {
     @JoinColumn(name = "user_id", referencedColumnName = "uid", nullable = false)
     private User userID;
 
+    @Enumerated(EnumType.ORDINAL)
     @Column(nullable = false)
-    private Role role = Role.member;
+    private GroupRole groupRole = GroupRole.member;
 
     @Column(nullable = false)
     private LocalDateTime joinTime;
