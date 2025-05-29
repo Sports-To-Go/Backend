@@ -1,8 +1,12 @@
 package org.sportstogo.backend.Security;
 
+import org.sportstogo.backend.Repository.AdminRepository;
+import org.sportstogo.backend.Service.AdminService;
 import org.sportstogo.backend.Service.FirebaseTokenService;
+import org.sportstogo.backend.Service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
@@ -23,13 +27,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        FirebaseAuthenticationFilter firebaseFilter = new FirebaseAuthenticationFilter(firebaseTokenService);
-
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, UserService userService) throws Exception {
+        FirebaseAuthenticationFilter firebaseFilter = new FirebaseAuthenticationFilter(firebaseTokenService, userService);
         return http
                 .csrf(CsrfConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/users/profile/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/users/profile").authenticated()
                         // this order FUCKING matters SO FUCKING MUCH DON'T TOUCH THIS OR I'M GOING TO HUNT YOU DOWN

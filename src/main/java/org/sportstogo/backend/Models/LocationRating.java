@@ -29,10 +29,10 @@ public class LocationRating {
 
     private int reservationId;
     private int locationId;
-    private int ratedBy;
+    private String ratedBy;
 
     public LocationRating(double score, String comment, LocalDate createdAt,
-                          int reservationId, int locationId, int ratedBy) {
+                          int reservationId, int locationId, String ratedBy) {
         this.score = score;
         this.comment = comment;
         this.createdAt = createdAt;

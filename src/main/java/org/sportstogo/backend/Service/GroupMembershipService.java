@@ -2,7 +2,7 @@ package org.sportstogo.backend.Service;
 
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.GroupMemberDTO;
-import org.sportstogo.backend.Enums.Role;
+import org.sportstogo.backend.Enums.GroupRole;
 import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.Models.User;
@@ -10,7 +10,6 @@ import org.sportstogo.backend.Repository.GroupMembershipRepository;
 import org.sportstogo.backend.Repository.GroupRepository;
 import org.sportstogo.backend.Repository.MessageRepository;
 import org.sportstogo.backend.Repository.UserRepository;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -47,7 +46,7 @@ public class GroupMembershipService {
 
     public boolean hasPermissions(String uid, Long groupID) {
         GroupMembership membership = groupMembershipRepository.findByUserIDAndGroupID(uid, groupID);
-        return membership != null && membership.getRole() != Role.member;
+        return membership != null && membership.getGroupRole() != GroupRole.member;
     }
 
     public GroupMemberDTO addGroupMember(Long groupId, String id) {
@@ -74,7 +73,7 @@ public class GroupMembershipService {
         GroupMembership newMembership = new GroupMembership();
         newMembership.setGroupID(group);
         newMembership.setUserID(user);
-        newMembership.setRole(Role.member); // default role for new membership
+        newMembership.setGroupRole(GroupRole.member); // default role for new membership
 
         // Save the new membership
         GroupMembership savedMembership = groupMembershipRepository.save(newMembership);
@@ -83,7 +82,7 @@ public class GroupMembershipService {
         GroupMemberDTO dto = new GroupMemberDTO();
         dto.setDisplayName(FirebaseTokenService.getDisplayNameFromUid(id));
         dto.setId(id);
-        dto.setRole(savedMembership.getRole());
+        dto.setGroupRole(savedMembership.getGroupRole());
 
         return dto;
     }

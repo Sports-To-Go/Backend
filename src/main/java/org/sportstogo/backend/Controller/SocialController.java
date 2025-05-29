@@ -4,15 +4,16 @@ import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.*;
 import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.JoinRequest;
-import org.sportstogo.backend.Service.GroupMembershipService;
-import org.sportstogo.backend.Service.GroupService;
-import org.sportstogo.backend.Service.JoinRequestService;
+import org.sportstogo.backend.Service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "social")
@@ -22,13 +23,15 @@ public class SocialController {
     private final GroupService groupService;
     private final GroupMembershipService groupMembershipService;
     private final JoinRequestService joinRequestService;
+    private final MessageService messageService;
+    private final ChatService chatService;
 
-    @GetMapping(path="/chat-previews")
-    public ResponseEntity<List<GroupPreviewDTO>> getChatPreviews(Authentication authentication) {
+    @GetMapping(path="/groups")
+    public ResponseEntity<List<GroupDataDTO>> getGroups(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
-        List<GroupPreviewDTO> groupPreviews = groupService.getChatPreviews(uid);
+        List<GroupDataDTO> groupData = groupService.getGroupData(uid);
 
-        return ResponseEntity.ok(groupPreviews);
+        return ResponseEntity.ok(groupData);
     }
 
     @GetMapping(path="/recommended-groups")
@@ -39,22 +42,27 @@ public class SocialController {
         return ResponseEntity.ok(groupPreviews);
     }
 
-    @GetMapping(path="/group/{groupID}")
-    public ResponseEntity<GroupDataDTO> getGroup(@PathVariable Long groupID, Authentication authentication) {
-        String uid = (String) authentication.getPrincipal();
-        boolean isMember = groupMembershipService.isMemberOfGroup(uid, groupID);
-        if(!isMember) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-        GroupDataDTO groupDataDTO = groupService.getGroupData(groupID);
-        return ResponseEntity.ok(groupDataDTO);
-    }
-
     @PostMapping(path="/group")
     public ResponseEntity<Group> createGroup(@RequestBody GroupCreationDTO groupCreationDTO, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         Group createdGroup = groupService.createGroup(groupCreationDTO, uid);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdGroup);
     }
+
+    @GetMapping("/group/{groupId}/messages")
+    public ResponseEntity<List<MessageDTO>> getGroupMessages(@PathVariable Long groupId,
+                                                             @RequestParam(name = "before") String beforeTimestamp,
+                                                             Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        if(!groupMembershipService.isMemberOfGroup(uid, groupId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        LocalDateTime before = LocalDateTime.parse(beforeTimestamp);
+        List<MessageDTO> messages = messageService.getMessagesForGroup(groupId, before);
+        return ResponseEntity.ok(messages);
+    }
+
 
     @PostMapping("/join-request/{groupId}")
     public ResponseEntity<JoinRequest> createJoinRequest(@PathVariable Long groupId, Authentication authentication) {
@@ -77,6 +85,20 @@ public class SocialController {
 
         GroupMemberDTO groupMemberDTO = request.isAccepted() ? groupMembershipService.addGroupMember(request.getGroupId(), request.getId()) : null;
         joinRequestService.removeRequest(request.getGroupId(), request.getId());
+
+        if(request.isAccepted()) {
+            Map<String, Object> meta = new HashMap<>();
+
+            assert groupMemberDTO != null;
+            meta.put("userID", groupMemberDTO.getId());
+            meta.put("displayName", groupMemberDTO.getDisplayName());
+            chatService.createSystemMessage(
+                    request.getGroupId(),
+                    uid,
+                    "USER_JOINED",
+                    meta
+            );
+        }
 
         return ResponseEntity.ok(groupMemberDTO);
     }

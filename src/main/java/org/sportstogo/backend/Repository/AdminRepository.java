@@ -1,8 +1,8 @@
 package org.sportstogo.backend.Repository;
 
+import org.sportstogo.backend.Enums.PeriodType;
 import org.sportstogo.backend.Models.User;
 import org.sportstogo.backend.Models.Revenue;
-import org.sportstogo.backend.Models.Revenue.PeriodType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,6 +26,9 @@ public interface AdminRepository extends JpaRepository<User, String> {
 
     @Query("SELECT COUNT(r) FROM Reservation r")
     long countReservations();
+
+    @Query("SELECT COUNT(u) from User u")
+    long countUsers();
 
     @Query(
             value = "SELECT COUNT(*) " +

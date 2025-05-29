@@ -1,4 +1,4 @@
-package org.sportstogo.backend.Models;
+package org.sportstogo.backend.Enums;
 
 public enum ReportTargetType {
     User,

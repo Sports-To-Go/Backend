@@ -3,12 +3,14 @@ package org.sportstogo.backend.Service;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.Models.Location;
+import org.sportstogo.backend.Enums.Sport;
 import org.sportstogo.backend.Repository.LocationRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,18 +24,65 @@ public class LocationService {
 
     /**
      * Retrieves all the locations from the database
+     *
      * @return a list of all locations
      */
-    public List<Location> getLocations() {return locationRepository.findAll();}
+    public List<Location> getLocations() {
+        return locationRepository.findAll();
+    }
+
+    /**
+     * Retrieves all locations matching a filter
+     *
+     * @return a list of all verified locations matching the filter
+     */
+    public List<Location> getFiltered(Sport sport, LocalTime openingTime,
+                                      LocalTime closingTime, String priceOrder) {
+        return locationRepository.findAll().stream()
+                .filter(location -> {
+                    boolean matchesSport = (sport == null || location.getSport() == sport);
+
+                    LocalTime locClosing = location.getClosingTime().equals(LocalTime.MIDNIGHT)
+                            ? LocalTime.of(23, 59)
+                            : location.getClosingTime();
+
+                    boolean matchesTime = true;
+
+                    if (openingTime != null) {
+                        matchesTime &= location.getOpeningTime().compareTo(openingTime) <= 0;
+                    }
+
+                    if (closingTime != null) {
+                        matchesTime &= locClosing.compareTo(closingTime) >= 0;
+                    }
+
+                    return matchesSport && matchesTime;
+                })
+                .sorted((l1, l2) -> {
+                    if ("ascending".equalsIgnoreCase(priceOrder)) {
+                        return Double.compare(l1.getHourlyRate(), l2.getHourlyRate());
+                    } else if ("descending".equalsIgnoreCase(priceOrder)) {
+                        return Double.compare(l2.getHourlyRate(), l1.getHourlyRate());
+                    } else {
+                        return 0;
+                    }
+                })
+                .toList();
+    }
+
 
     /**
      * Adds a new location to the database
+     *
      * @param location the location object from the request body
      * @return HTTP CREATED if successful, HTTP CONFLICT otherwise
      */
     public ResponseEntity<String> addNewLocation(Location location) {
-        if(this.locationRepository.findByName(location.getName()).isPresent()) {
+        if (this.locationRepository.findByName(location.getName()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("The location already exists");
+        }
+        if (location.getClosingTime().equals(LocalTime.MIDNIGHT)) {
+            location.setClosingTime(LocalTime.of(23, 59));
         }
         location.setCreatedAt(LocalDate.now());
         location.setVerified(false);
@@ -43,11 +92,12 @@ public class LocationService {
 
     /**
      * Deletes a location by its ID
+     *
      * @param id the ID of the location to be removed
      * @return HTTP OK if successful, HTTP CONFLICT otherwise
      */
     public ResponseEntity<String> deleteById(Long id) {
-        if(locationRepository.findById(id).isEmpty()) {
+        if (locationRepository.findById(id).isEmpty()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Location not found");
         }
         locationRepository.deleteById(id);
@@ -56,7 +106,8 @@ public class LocationService {
 
     /**
      * Updates the name of an existing location
-     * @param id the id of the location whose name is to be changed
+     *
+     * @param id   the id of the location whose name is to be changed
      * @param name the new name of the location
      * @return HTTP OK if successful, HTTP CONFLICT otherwise
      */

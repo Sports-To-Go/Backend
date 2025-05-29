@@ -2,11 +2,14 @@ package org.sportstogo.backend.Controller;
 
 
 import org.sportstogo.backend.Models.Location;
+import org.sportstogo.backend.Enums.Sport;
 import org.sportstogo.backend.Service.LocationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalTime;
 import java.util.List;
+
 /**
  * REST Controller for managing Location entities
  * Provides endpoints for CRUD operations on locations
@@ -23,6 +26,18 @@ public class LocationController {
      */
     @GetMapping
     public List<Location> getLocations() {return locationService.getLocations();}
+
+    /**
+     * Retrieves all locations matching a series of filters
+     * @return a list of all locations
+     */
+    @GetMapping("/filter")
+    public List<Location> getFiltered(@RequestParam(required = false) Sport sport,
+                                                      @RequestParam(required = false) LocalTime start,
+                                                      @RequestParam(required = false) LocalTime end,
+                                                      @RequestParam(required = false) String price) {
+        return locationService.getFiltered(sport, start, end, price);
+    }
 
     /**
      * Adds a new location tot the database

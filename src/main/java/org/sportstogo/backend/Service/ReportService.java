@@ -2,10 +2,8 @@ package org.sportstogo.backend.Service;
 
 
 import lombok.AllArgsConstructor;
-import org.sportstogo.backend.Models.Group;
-import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.Models.Report;
-import org.sportstogo.backend.Models.ReportStatus;
+import org.sportstogo.backend.Enums.ReportStatus;
 import org.sportstogo.backend.Repository.ReportRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +26,7 @@ public class ReportService {
     }
 
     @Transactional
-    public void updateReport(Long id, Long reviewedBy, LocalDate reviewedAt, ReportStatus status) {
+    public void updateReport(Long id, String reviewedBy, LocalDate reviewedAt, ReportStatus status) {
 
         Optional<Report> optionalReport = reportRepository.findById(id);
 
