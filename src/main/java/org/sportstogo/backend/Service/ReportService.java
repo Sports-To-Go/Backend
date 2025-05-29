@@ -50,6 +50,10 @@ public class ReportService {
 
     }
 
+
+    public void deleteByTargetId(String targetId) {
+        reportRepository.deleteByTargetId(targetId);
+    }
     public void deleteReport(Long id) {
         if  (!reportRepository.existsById(id)) {
             throw new IllegalArgumentException("Report with id " + id + " does not exist");
