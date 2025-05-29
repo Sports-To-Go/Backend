@@ -4,6 +4,7 @@ package org.sportstogo.backend.Service;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.Models.Ban;
 import org.sportstogo.backend.Repository.BanRepository;
+import org.sportstogo.backend.Repository.ReportRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,13 +16,15 @@ import java.util.Optional;
 public class BanService {
 
     private BanRepository banRepository;
-
+    private final ReportRepository reportRepository;
     public List<Ban> getBans() {
         return banRepository.findAll();
     }
 
+    @Transactional
     public void addBan(Ban ban) {
         banRepository.save(ban);
+        reportRepository.deleteByTargetId(ban.getIdUser());
     }
 
     @Transactional
