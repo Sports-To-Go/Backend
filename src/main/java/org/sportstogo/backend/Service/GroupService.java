@@ -57,7 +57,8 @@ public class GroupService {
                 .map(membership -> new GroupMemberDTO(
                         FirebaseTokenService.getDisplayNameFromUid(membership.getUserID().getUid()),
                         membership.getUserID().getUid(),
-                        membership.getGroupRole()
+                        membership.getGroupRole(),
+                        membership.getNickname()
                 ))
                 .toList();
             groupDataDTO.setGroupMembers(groupMembers);

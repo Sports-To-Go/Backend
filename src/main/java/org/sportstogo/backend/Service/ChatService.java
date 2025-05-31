@@ -84,11 +84,7 @@ public class ChatService {
                     message.getType().ordinal(), message.getSystemEvent(), message.getMetaData());
 //            System.out.println("Message processing time: " +
 //                    LocalDateTime.now().minusNanos(now.getNano()).getNano() + " nanoseconds");
-            System.out.println(message.getSystemEvent());
-            System.out.println(message.getType());
-            if (message.getType() == MessageType.SYSTEM && message.getSystemEvent().equals("THEME_CHANGED")) {
-                groupRepository.updateGroupTheme(incomingMessage.getGroupID(), Theme.valueOf((String) incomingMessage.getMeta().get("themeName")));
-            }
+
             // Convert to DTO for broadcasting
             message.setID(id);
             MessageDTO messageDTO = message.toDTO();
