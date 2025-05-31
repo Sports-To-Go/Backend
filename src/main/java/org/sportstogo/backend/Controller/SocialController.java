@@ -4,10 +4,13 @@ import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.*;
 import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.JoinRequest;
+import org.sportstogo.backend.Models.Message;
+import org.sportstogo.backend.Repository.GroupMembershipRepository;
 import org.sportstogo.backend.Service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -25,6 +28,7 @@ public class SocialController {
     private final JoinRequestService joinRequestService;
     private final MessageService messageService;
     private final ChatService chatService;
+    private final UserService userService;
 
     @GetMapping(path="/groups")
     public ResponseEntity<List<GroupDataDTO>> getGroups(Authentication authentication) {
@@ -70,7 +74,26 @@ public class SocialController {
         JoinRequest joinRequest = joinRequestService.addJoinRequest(uid, groupId);
         return ResponseEntity.status(HttpStatus.CREATED).body(joinRequest);
     }
+    @PutMapping("group/{groupId}/theme/{theme}")
+    public ResponseEntity<Boolean> changeTheme(@PathVariable Long groupId,  @PathVariable String theme, Authentication authentication ) {
+        String uid = (String) authentication.getPrincipal();
+        Map<String,Object> map = new HashMap<>();
+        map.put("themeName",theme);
+        chatService.createSystemMessage(groupId, uid, "THEME_CHANGED", map);
+        return  new ResponseEntity<>(groupMembershipService.changeTheme(uid, groupId, theme), HttpStatus.OK);
+    }
+    @PutMapping("group/nickname")
+    public ResponseEntity<Boolean> changeNickname(Authentication authentication, @RequestBody GroupMemberShortDTO groupMemberShortDTO) {
+        String uid = (String) authentication.getPrincipal();
+        Map<String,Object> map = new HashMap<>();
+        map.put("changedByName",uid);
+        map.put("uid", groupMemberShortDTO.getUid());
+        map.put("nickname", groupMemberShortDTO.getNickname());
+        System.out.println(groupMemberShortDTO.getNickname() + " " + groupMemberShortDTO.getUid() + " " + groupMemberShortDTO.getGroupId());
+        chatService.createSystemMessage(groupMemberShortDTO.getGroupId(), uid, "NICKNAME_CHANGED", map);
 
+        return new ResponseEntity<>(groupMembershipService.changeNickname(uid, groupMemberShortDTO), HttpStatus.OK);
+    }
     @PostMapping("/join-requests/handle")
     public ResponseEntity<GroupMemberDTO> handleJoinRequest(@RequestBody HandleJoinRequestDTO request,
                                                             Authentication authentication) {
