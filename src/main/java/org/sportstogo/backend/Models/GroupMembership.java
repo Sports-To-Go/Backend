@@ -34,7 +34,8 @@ public class GroupMembership {
 
     @Column(nullable = false)
     private LocalDateTime joinTime;
-
+    @Column(nullable = true)
+    private String nickname;
     @PrePersist
     protected void onCreate() {
         this.joinTime = LocalDateTime.now();

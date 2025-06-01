@@ -5,9 +5,11 @@ import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.idModels.GroupMemberID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -40,4 +42,8 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
     WHERE gm.user_id = :uid
     """, nativeQuery = true)
     List<GroupDataDTO> findAllByUserID(@Param("uid") String uid);
+    @Modifying
+    @Transactional
+    @Query("UPDATE GroupMembership gm SET gm.nickname = :nickname WHERE gm.userID.uid = :userId AND gm.groupID.id = :groupId")
+    void updateNickname(@Param("userId") String userId, @Param("groupId") Long groupId, @Param("nickname") String nickname);
 }

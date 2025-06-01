@@ -2,7 +2,9 @@ package org.sportstogo.backend.Service;
 
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.GroupMemberDTO;
+import org.sportstogo.backend.DTOs.GroupMemberShortDTO;
 import org.sportstogo.backend.Enums.GroupRole;
+import org.sportstogo.backend.Enums.Theme;
 import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.Models.User;
@@ -85,5 +87,21 @@ public class GroupMembershipService {
         dto.setGroupRole(savedMembership.getGroupRole());
 
         return dto;
+    }
+
+    public boolean changeTheme(String uid, Long groupId, String theme) {
+        if (isMemberOfGroup(uid, groupId)) {
+            groupRepository.updateGroupTheme(groupId, Theme.valueOf(theme));
+            return true;
+        } else return false;
+    }
+
+    public boolean changeNickname(String uid,GroupMemberShortDTO groupMemberShortDTO) {
+        if (isMemberOfGroup(uid, groupMemberShortDTO.getGroupId())) {
+            groupMembershipRepository.updateNickname(groupMemberShortDTO.getUid(),
+                    groupMemberShortDTO.getGroupId(),
+                    groupMemberShortDTO.getNickname());
+        } else return false;
+        return false;
     }
 }
