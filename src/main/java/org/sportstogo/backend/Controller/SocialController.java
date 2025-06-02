@@ -50,6 +50,7 @@ public class SocialController {
     public ResponseEntity<Group> createGroup(@RequestBody GroupCreationDTO groupCreationDTO, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         Group createdGroup = groupService.createGroup(groupCreationDTO, uid);
+        chatService.createSystemMessage(createdGroup.getId(), uid, "GROUP_CREATED", null);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdGroup);
     }
 
@@ -78,7 +79,7 @@ public class SocialController {
     public ResponseEntity<Boolean> changeTheme(@PathVariable Long groupId,  @PathVariable String theme, Authentication authentication ) {
         String uid = (String) authentication.getPrincipal();
         Map<String,Object> map = new HashMap<>();
-        map.put("themeName",theme);
+        map.put("themeName", theme);
         chatService.createSystemMessage(groupId, uid, "THEME_CHANGED", map);
         return  new ResponseEntity<>(groupMembershipService.changeTheme(uid, groupId, theme), HttpStatus.OK);
     }
@@ -89,7 +90,6 @@ public class SocialController {
         map.put("changedByName",uid);
         map.put("uid", groupMemberShortDTO.getUid());
         map.put("nickname", groupMemberShortDTO.getNickname());
-        System.out.println(groupMemberShortDTO.getNickname() + " " + groupMemberShortDTO.getUid() + " " + groupMemberShortDTO.getGroupId());
         chatService.createSystemMessage(groupMemberShortDTO.getGroupId(), uid, "NICKNAME_CHANGED", map);
 
         return new ResponseEntity<>(groupMembershipService.changeNickname(uid, groupMemberShortDTO), HttpStatus.OK);

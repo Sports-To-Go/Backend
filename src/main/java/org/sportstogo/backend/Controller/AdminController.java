@@ -163,10 +163,6 @@ public class AdminController {
                 : ResponseEntity.ok(revenues);
     }
 
-    /**
-     * Venituri anuale între două date (inclusiv).
-     * Ex: /admin/revenue/annual?from=2020-01-01&to=2025-01-01
-     */
     @GetMapping("/revenue/annual")
     public ResponseEntity<List<Revenue>> getAnnualRevenue(
             @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,

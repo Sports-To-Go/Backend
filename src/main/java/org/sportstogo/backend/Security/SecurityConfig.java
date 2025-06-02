@@ -33,9 +33,8 @@ public class SecurityConfig {
                 .csrf(CsrfConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").authenticated()
                         .requestMatchers("/users/profile/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/users/profile").authenticated()
                         // this order FUCKING matters SO FUCKING MUCH DON'T TOUCH THIS OR I'M GOING TO HUNT YOU DOWN
                         .requestMatchers("/social/chat/**").permitAll()
                         .requestMatchers("/social/**").authenticated()
