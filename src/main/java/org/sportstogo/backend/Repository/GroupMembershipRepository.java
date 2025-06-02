@@ -6,9 +6,11 @@ import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.idModels.GroupMemberID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -35,15 +37,23 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
     SELECT
         g.id AS id,
         g.name AS name,
-        g.description AS description
+        g.description AS description,
+        g.theme as theme
     FROM group_memberships gm JOIN groups g ON gm.group_id = g.id
     WHERE gm.user_id = :uid
     """, nativeQuery = true)
     List<GroupDataDTO> findAllByUserID(@Param("uid") String uid);
+
 
     @Query("SELECT new org.sportstogo.backend.DTOs.GroupPreviewDTO(g.id, g.name, g.description) " +
             "FROM GroupMembership gm " +
             "JOIN gm.groupID g " +
             "WHERE gm.userID.uid = :uid AND gm.groupRole <> 0")
     List<GroupPreviewDTO> findGroupsWhereUserHasElevatedRole(@Param("uid") String uid);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE GroupMembership gm SET gm.nickname = :nickname WHERE gm.userID.uid = :userId AND gm.groupID.id = :groupId")
+    void updateNickname(@Param("userId") String userId, @Param("groupId") Long groupId, @Param("nickname") String nickname);
+
 }

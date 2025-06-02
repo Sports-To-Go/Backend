@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.CsrfConfig
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class SecurityConfig {
                 .csrf(CsrfConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").authenticated()
                         .requestMatchers("/users/profile/**").authenticated()
                         // this order FUCKING matters SO FUCKING MUCH DON'T TOUCH THIS OR I'M GOING TO HUNT YOU DOWN
                         .requestMatchers("/social/chat/**").permitAll()

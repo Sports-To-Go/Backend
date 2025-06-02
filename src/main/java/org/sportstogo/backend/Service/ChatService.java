@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.MessageDTO;
 import org.sportstogo.backend.Enums.MessageType;
+import org.sportstogo.backend.Enums.Theme;
 import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.Models.Message;
 import org.sportstogo.backend.Repository.GroupMembershipRepository;
@@ -31,6 +32,7 @@ public class ChatService {
     private final UserRepository userRepository;
     private final GroupMembershipRepository groupMembershipRepository;
 
+
     /**
      * Add a user session
      */
@@ -39,7 +41,7 @@ public class ChatService {
     }
 
     /**
-     * Remove a user session
+     * Remove a session from all groups
      */
     public void removeUserSession(String userId) {
         userSessions.remove(userId);
@@ -73,10 +75,13 @@ public class ChatService {
             message.setUserID(groupMembership.getUserID());
             message.setContent(incomingMessage.getContent());
             message.setTimeSent(LocalDateTime.now());
-            message.setType(MessageType.TEXT);
+            message.setType(incomingMessage.getType());
+            message.setSystemEvent(incomingMessage.getSystemEvent());
+            message.setMetaData(objectMapper.writeValueAsString(incomingMessage.getMeta()));
 
-            // Save message
-            Long id = messageRepository.insert(groupId, senderId, message.getContent(), message.getTimeSent(), message.getType().ordinal());
+
+            Long id = messageRepository.insert(groupId, senderId, message.getContent(), message.getTimeSent(),
+                    message.getType().ordinal(), message.getSystemEvent(), message.getMetaData());
 //            System.out.println("Message processing time: " +
 //                    LocalDateTime.now().minusNanos(now.getNano()).getNano() + " nanoseconds");
 
@@ -142,12 +147,5 @@ public class ChatService {
         } catch (Exception e) {
             System.err.println("Failed to create system message: " + e.getMessage());
         }
-    }
-
-    /**
-     * Get count of active sessions
-     */
-    public int getActiveSessionCount() {
-        return userSessions.size();
     }
 }
