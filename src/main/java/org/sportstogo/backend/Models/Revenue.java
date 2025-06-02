@@ -28,4 +28,11 @@ public class Revenue {
 
     @Column(name = "total_amount", nullable = false)
     private Double totalAmount;
+
+    public Revenue(LocalDate periodStart, PeriodType periodType, Double totalAmount) {
+        this.periodStart = periodStart;
+        this.periodType = periodType;
+        this.totalAmount = totalAmount;
+    }
+
 }
