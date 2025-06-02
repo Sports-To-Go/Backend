@@ -1,6 +1,7 @@
 package org.sportstogo.backend.Repository;
 
 import org.sportstogo.backend.DTOs.GroupDataDTO;
+import org.sportstogo.backend.DTOs.GroupPreviewDTO;
 import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.idModels.GroupMemberID;
@@ -39,4 +40,10 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
     WHERE gm.user_id = :uid
     """, nativeQuery = true)
     List<GroupDataDTO> findAllByUserID(@Param("uid") String uid);
+
+    @Query("SELECT new org.sportstogo.backend.DTOs.GroupPreviewDTO(g.id, g.name, g.description) " +
+            "FROM GroupMembership gm " +
+            "JOIN gm.groupID g " +
+            "WHERE gm.userID.uid = :uid AND gm.groupRole <> 0")
+    List<GroupPreviewDTO> findGroupsWhereUserHasElevatedRole(@Param("uid") String uid);
 }

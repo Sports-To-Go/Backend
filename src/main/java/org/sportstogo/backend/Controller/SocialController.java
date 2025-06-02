@@ -110,4 +110,10 @@ public class SocialController {
         if(removed) return ResponseEntity.ok(true);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+
+    @GetMapping("/not-basic")
+    public ResponseEntity<List<GroupPreviewDTO>> getGroupsWhereUserHasElevatedRole(@RequestParam String uid) {
+        List<GroupPreviewDTO> groups = groupService.getGroupsWhereUserIsNotBasic(uid);
+        return ResponseEntity.ok(groups);
+    }
 }
