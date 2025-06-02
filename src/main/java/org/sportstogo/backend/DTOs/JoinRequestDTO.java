@@ -12,6 +12,5 @@ import lombok.Setter;
 public class JoinRequestDTO {
     private String id;
     private String displayName;
-    private String motivation;
 //    private String photoURL;
 }

@@ -33,7 +33,6 @@ public class JoinRequestService {
         JoinRequest joinRequest = new JoinRequest();
         joinRequest.setUserID(user);
         joinRequest.setGroupID(group);
-        joinRequest.setMotivation("");  // empty string
 
         return joinRequestRepository.save(joinRequest);
     }

@@ -148,4 +148,25 @@ public class ChatService {
             System.err.println("Failed to create system message: " + e.getMessage());
         }
     }
+
+    public void sendDirectSystemMessage(String targetUid, String eventType, Map<String, Object> meta) {
+        System.out.println(targetUid + " " + eventType + " " + meta);
+        try {
+            MessageDTO message = new MessageDTO();
+            message.setType(MessageType.SYSTEM);
+            message.setSystemEvent(eventType);
+            message.setMeta(meta);
+            message.setContent("");
+            message.setGroupID(null);
+
+            String json = objectMapper.writeValueAsString(message);
+            WebSocketSession session = userSessions.get(targetUid);
+            if (session != null && session.isOpen()) {
+                session.sendMessage(new TextMessage(json));
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to send JOINED_GROUP message: " + e.getMessage());
+        }
+    }
+
 }

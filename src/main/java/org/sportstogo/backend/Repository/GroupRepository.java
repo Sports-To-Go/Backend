@@ -41,7 +41,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
         SET theme = :theme
         WHERE id = :groupId
     """, nativeQuery = true)
-    int updateGroupTheme(@Param("groupId") Long groupId, @Param("theme") Theme theme);
-
+    void updateGroupTheme(@Param("groupId") Long groupId, @Param("theme") Theme theme);
 }
 

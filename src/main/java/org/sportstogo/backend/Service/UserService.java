@@ -25,17 +25,12 @@ public class UserService {
     }
 
     public User updateUser(String uid, User updatedUserData) {
-        User user = getUserByUid(uid); // Căutăm userul în DB
+        User user = getUserByUid(uid);
 
         if (updatedUserData.getDescription() != null) {
             user.setDescription(updatedUserData.getDescription());
         }
 
-        // Dacă vei adăuga mai târziu și alte câmpuri editabile:
-        // if (updatedUserData.getDisplayName() != null) {
-        //     user.setDisplayName(updatedUserData.getDisplayName());
-        // }
-
-        return userRepository.save(user); // Salvăm modificările
+        return userRepository.save(user);
     }
 }
