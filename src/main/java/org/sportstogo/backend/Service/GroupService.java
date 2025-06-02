@@ -73,4 +73,8 @@ public class GroupService {
     public List<GroupPreviewDTO> getGroupRecommendations(String uid) {
         return groupRepository.findGroupRecommendations(uid);
     }
+
+    public List<GroupPreviewDTO> getGroupsWhereUserIsNotBasic(String uid) {
+        return groupMembershipRepository.findGroupsWhereUserHasElevatedRole(uid);
+    }
 }
