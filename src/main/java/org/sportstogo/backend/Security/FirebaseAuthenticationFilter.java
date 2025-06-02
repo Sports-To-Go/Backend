@@ -41,18 +41,8 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
             try {
                 String uid = firebaseTokenService.verifyTokenAndGetUid(idToken);
 
-                User user = userService.getUserByUid(uid);
-
-                List<GrantedAuthority> authorities = new ArrayList<>();
-
-                if (user.isAdmin()) {
-                    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-                } else {
-                    authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-                }
-
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(uid, null, authorities);
+                        new UsernamePasswordAuthenticationToken(uid, null, Collections.emptyList());
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {

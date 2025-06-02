@@ -30,6 +30,7 @@ public class UserController {
     @PostMapping(path="/profile")
     public ResponseEntity<User> createUser(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
+        System.out.println(uid);
         User createdUser = userService.createUser(uid);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }

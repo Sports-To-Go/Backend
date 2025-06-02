@@ -148,11 +148,4 @@ public class ChatService {
             System.err.println("Failed to create system message: " + e.getMessage());
         }
     }
-
-    /**
-     * Get count of active sessions
-     */
-    public int getActiveSessionCount() {
-        return userSessions.size();
-    }
 }
