@@ -150,7 +150,6 @@ public class ChatService {
     }
 
     public void sendDirectSystemMessage(String targetUid, String eventType, Map<String, Object> meta) {
-        System.out.println(targetUid + " " + eventType + " " + meta);
         try {
             MessageDTO message = new MessageDTO();
             message.setType(MessageType.SYSTEM);

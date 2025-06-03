@@ -44,6 +44,40 @@ public class GroupMembershipService {
         return true;
     }
 
+    public void kickMember(String callerUID, String targetUID, Long groupID) {
+        GroupMembership caller = groupMembershipRepository.findByUserIDAndGroupID(callerUID, groupID);
+        GroupMembership target = groupMembershipRepository.findByUserIDAndGroupID(targetUID, groupID);
+
+        if (caller == null || target == null)
+            throw new IllegalArgumentException("Caller or target not in group");
+
+        if (callerUID.equals(targetUID))
+            throw new IllegalArgumentException("Cannot kick yourself");
+
+        if (caller.getGroupRole().ordinal() <= target.getGroupRole().ordinal())
+            throw new IllegalArgumentException("Insufficient role to kick this user");
+
+        groupMembershipRepository.delete(target);
+    }
+
+    public void changeRole(String callerUID, String targetUID, Long groupID, String newRoleStr) {
+        GroupMembership caller = groupMembershipRepository.findByUserIDAndGroupID(callerUID, groupID);
+        GroupMembership target = groupMembershipRepository.findByUserIDAndGroupID(targetUID, groupID);
+
+        if (caller == null || target == null)
+            throw new IllegalArgumentException("Caller or target not in group");
+
+        GroupRole newRole = GroupRole.valueOf(newRoleStr);
+        if (caller.getGroupRole() != GroupRole.admin)
+            throw new IllegalArgumentException("Only admin can change roles");
+
+        if (newRole == GroupRole.admin)
+            throw new IllegalArgumentException("Cannot promote to admin");
+
+        target.setGroupRole(newRole);
+        groupMembershipRepository.save(target);
+    }
+
 
     public boolean hasPermissions(String uid, Long groupID) {
         GroupMembership membership = groupMembershipRepository.findByUserIDAndGroupID(uid, groupID);
