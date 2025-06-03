@@ -153,14 +153,54 @@ public class SocialController {
         return ResponseEntity.ok(null);
     }
 
+    @PutMapping("/group/{groupID}/members/{targetUID}/role")
+    public ResponseEntity<Void> changeRole(
+            Authentication auth,
+            @PathVariable Long groupID,
+            @PathVariable String targetUID,
+            @RequestBody Map<String, String> body) {
+        String newRole = body.get("newRole");
+        String callerUID = (String) auth.getPrincipal();
+
+        groupMembershipService.changeRole(callerUID, targetUID, groupID, newRole);
+        Map<String, Object> meta = new HashMap<>();
+        meta.put("uid", targetUID);
+        meta.put("newRole", newRole);
+        meta.put("displayName", FirebaseTokenService.getDisplayNameFromUid(targetUID));
+
+        chatService.createSystemMessage(groupID, callerUID, "ROLE_CHANGED", meta);
+
+        return ResponseEntity.ok().build();
+    }
+
+
     @DeleteMapping(path="/group/{groupID}")
     public ResponseEntity<Boolean> deleteGroupMember(@PathVariable Long groupID, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         boolean removed = groupMembershipService.removeUserFromGroup(uid, groupID);
-        chatService.createSystemMessage(groupID, uid, "GROUP_DELETED", null);
+        if(groupService.exists(groupID)) {
+            chatService.createSystemMessage(groupID, uid, "USER_LEFT", null);
+        }
         if(removed) return ResponseEntity.ok(true);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+
+    @DeleteMapping("/group/{groupID}/members/{targetUID}")
+    public ResponseEntity<Void> kickMember(
+            Authentication auth,
+            @PathVariable Long groupID,
+            @PathVariable String targetUID) {
+        String callerUID = (String) auth.getPrincipal();
+        groupMembershipService.kickMember(callerUID, targetUID, groupID);
+        chatService.createSystemMessage(groupID, callerUID, "USER_KICKED", Map.of(
+                "uid", targetUID,
+                "kickedBy", callerUID,
+                "kickedByName", FirebaseTokenService.getDisplayNameFromUid(callerUID),
+                "kickedName", FirebaseTokenService.getDisplayNameFromUid(targetUID)
+        ));;
+        return ResponseEntity.ok().build();
+    }
+
 
     @GetMapping("/not-basic")
     public ResponseEntity<List<GroupPreviewDTO>> getGroupsWhereUserHasElevatedRole(@RequestParam String uid) {

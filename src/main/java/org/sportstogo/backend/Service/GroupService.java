@@ -97,4 +97,8 @@ public class GroupService {
     public List<GroupPreviewDTO> getGroupsWhereUserIsNotBasic(String uid) {
         return groupMembershipRepository.findGroupsWhereUserHasElevatedRole(uid);
     }
+
+    public boolean exists(Long groupID) {
+        return groupRepository.existsById(groupID);
+    }
 }
