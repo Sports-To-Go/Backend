@@ -3,6 +3,7 @@ package org.sportstogo.backend.Controller;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.*;
 import org.sportstogo.backend.Models.Group;
+import org.sportstogo.backend.Models.Image;
 import org.sportstogo.backend.Models.JoinRequest;
 import org.sportstogo.backend.Models.Message;
 import org.sportstogo.backend.Repository.GroupMembershipRepository;
@@ -12,11 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping(path = "social")
@@ -28,7 +31,7 @@ public class SocialController {
     private final JoinRequestService joinRequestService;
     private final MessageService messageService;
     private final ChatService chatService;
-    private final UserService userService;
+    private final ImageService imageService;
 
     @GetMapping(path="/groups")
     public ResponseEntity<List<GroupDataDTO>> getGroups(Authentication authentication) {
@@ -61,13 +64,31 @@ public class SocialController {
         return ResponseEntity.ok(groupPreviews);
     }
 
-    @PostMapping(path="/group")
-    public ResponseEntity<Group> createGroup(@RequestBody GroupCreationDTO groupCreationDTO, Authentication authentication) {
+    @PostMapping(path = "/group", consumes = {"multipart/form-data"})
+    public ResponseEntity<GroupDataDTO> createGroup(
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            Authentication authentication
+    ) {
         String uid = (String) authentication.getPrincipal();
-        Group createdGroup = groupService.createGroup(groupCreationDTO, uid);
+
+        Image newImage = null;
+        try {
+            if (image != null && !image.isEmpty()) {
+                newImage = imageService.saveImage(image);  // all validation is done here
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        Group createdGroup = groupService.createGroup(name, description, uid, newImage);
         chatService.createSystemMessage(createdGroup.getId(), uid, "GROUP_CREATED", null);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdGroup);
+
+        GroupDataDTO dto = groupService.getGroupDataById(createdGroup.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
+
 
     @GetMapping("/group/{groupId}/messages")
     public ResponseEntity<List<MessageDTO>> getGroupMessages(@PathVariable Long groupId,

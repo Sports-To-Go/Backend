@@ -17,13 +17,15 @@ public class GroupDataDTO extends GroupPreviewDTO {
     private List<GroupMemberDTO> groupMembers = new ArrayList<>();
     private List<JoinRequestDTO> joinRequests = new ArrayList<>();
     private Theme theme;
-    GroupDataDTO(Long id, String name, String description,  Short theme) {
-        super(id, name, description);
+
+    GroupDataDTO(Long id, String name, String description,  Short theme, String imageUrl) {
+        super(id, name, description, imageUrl);
         this.theme = Theme.values()[theme];
     }
 
     public GroupDataDTO(Group group, List<GroupMemberDTO> groupMembers, List<JoinRequestDTO> joinRequestDTOs) {
-        super(group.getId(), group.getName(), group.getDescription() != null ? group.getDescription() : "No description");
+        super(group.getId(), group.getName(), group.getDescription() != null ? group.getDescription() : "No description",
+                group.getImage() != null ? group.getImage().getUrl() : null);
         this.groupMembers = groupMembers;
         this.joinRequests = joinRequestDTOs;
         this.theme = group.getTheme();

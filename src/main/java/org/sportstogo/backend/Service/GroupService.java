@@ -3,18 +3,14 @@ package org.sportstogo.backend.Service;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.*;
 import org.sportstogo.backend.Enums.GroupRole;
-import org.sportstogo.backend.Enums.Theme;
 import org.sportstogo.backend.Exceptions.UserNotFoundException;
-import org.sportstogo.backend.Models.Group;
-import org.sportstogo.backend.Models.GroupMembership;
-import org.sportstogo.backend.Models.JoinRequest;
-import org.sportstogo.backend.Models.User;
+import org.sportstogo.backend.Models.*;
 import org.sportstogo.backend.Repository.GroupMembershipRepository;
 import org.sportstogo.backend.Repository.GroupRepository;
 import org.sportstogo.backend.Repository.JoinRequestRepository;
 import org.sportstogo.backend.Repository.UserRepository;
 import org.springframework.stereotype.Service;
-import org.sportstogo.backend.Enums.Theme;
+
 import java.util.List;
 @Service
 @AllArgsConstructor
@@ -25,16 +21,17 @@ public class GroupService {
     private final UserRepository userRepository;
     private final JoinRequestRepository joinRequestRepository;
 
-    public Group createGroup(GroupCreationDTO groupCreationDTO, String uid) {
+    public Group createGroup(String name, String description, String uid, Image image) {
         User creator = userRepository.findById(uid).orElse(null);
         if(creator == null) {
             throw new UserNotFoundException(uid);
         }
 
         Group group = new Group();
-        group.setName(groupCreationDTO.getName());
-        group.setDescription(groupCreationDTO.getDescription());
+        group.setName(name);
+        group.setDescription(description);
         group.setCreatedBy(creator);
+        group.setImage(image);
         Group createdGroup = groupRepository.save(group);
 
         GroupMembership groupMembership = new GroupMembership();
