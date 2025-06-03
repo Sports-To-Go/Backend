@@ -308,16 +308,6 @@ public class AdminController {
      */
     @PostMapping(path = "reports")
     public ResponseEntity<String> addReports(@RequestBody Report report, Authentication authentication) {
-
-        String uid = (String) authentication.getPrincipal();
-
-        boolean isAdmin = adminService.isAdmin(uid);
-
-        if (!isAdmin) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-
-
         report.setCreatedAt(LocalDate.now());
         reportService.addReport(report);
         return ResponseEntity.ok()
