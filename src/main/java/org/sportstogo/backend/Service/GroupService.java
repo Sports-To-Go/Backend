@@ -70,6 +70,26 @@ public class GroupService {
         return groupData;
     }
 
+    public GroupDataDTO getGroupDataById(Long groupId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found with id: " + groupId));
+
+        List<GroupMembership> memberships = groupMembershipRepository.findByGroupID(groupId);
+        List<GroupMemberDTO> groupMembers = memberships.stream()
+                .map(membership -> new GroupMemberDTO(
+                        FirebaseTokenService.getDisplayNameFromUid(membership.getUserID().getUid()),
+                        membership.getUserID().getUid(),
+                        membership.getGroupRole(),
+                        membership.getNickname()
+                ))
+                .toList();
+
+        List<JoinRequest> joinRequests = joinRequestRepository.findByGroupID(groupId);
+        List<JoinRequestDTO> joinRequestDTOs = joinRequests.stream().map(JoinRequest::toDTO).toList();
+
+        return new GroupDataDTO(group, groupMembers, joinRequestDTOs);
+    }
+
     public List<GroupPreviewDTO> getGroupRecommendations(String uid) {
         return groupRepository.findGroupRecommendations(uid);
     }

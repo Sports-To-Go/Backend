@@ -28,8 +28,6 @@ public class JoinRequest {
     @JoinColumn(name = "user_id", referencedColumnName = "uid", nullable = false)
     private User userID;
 
-    private String motivation;
-
     @Column(nullable = false)
     private LocalDateTime requestTime;
 
@@ -41,7 +39,6 @@ public class JoinRequest {
     public JoinRequestDTO toDTO() {
         JoinRequestDTO dto = new JoinRequestDTO();
         dto.setDisplayName(FirebaseTokenService.getDisplayNameFromUid(userID.getUid()));
-        dto.setMotivation(motivation);
         dto.setId(userID.getUid());
         return dto;
     }

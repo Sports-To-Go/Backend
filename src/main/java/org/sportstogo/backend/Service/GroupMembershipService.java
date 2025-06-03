@@ -8,10 +8,7 @@ import org.sportstogo.backend.Enums.Theme;
 import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.Models.User;
-import org.sportstogo.backend.Repository.GroupMembershipRepository;
-import org.sportstogo.backend.Repository.GroupRepository;
-import org.sportstogo.backend.Repository.MessageRepository;
-import org.sportstogo.backend.Repository.UserRepository;
+import org.sportstogo.backend.Repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -24,6 +21,7 @@ public class GroupMembershipService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
+    private final JoinRequestRepository joinRequestRepository;
 
     public boolean isMemberOfGroup(String uid, Long groupID) {
         return groupMembershipRepository.existsByUserIDAndGroupID(uid, groupID);
@@ -40,6 +38,7 @@ public class GroupMembershipService {
         if (!groupMembershipRepository.existsByGroupID(groupID)) {
             // If no members remain, remove all associated messages and then delete the group
             messageRepository.deleteAllByGroupId(groupID);
+            joinRequestRepository.deleteAllByGroupId(groupID);
             groupRepository.deleteById(groupID);
         }
         return true;

@@ -38,6 +38,21 @@ public class SocialController {
         return ResponseEntity.ok(groupData);
     }
 
+    @GetMapping(path="/groups/{groupId}")
+    public ResponseEntity<GroupDataDTO> getGroup(Authentication authentication, @PathVariable Long groupId) {
+        String uid = (String) authentication.getPrincipal();
+        if(!groupMembershipService.isMemberOfGroup(uid, groupId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        GroupDataDTO groupData = groupService.getGroupDataById(groupId);
+        if (groupData == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(groupData);
+    }
+
     @GetMapping(path="/recommended-groups")
     public ResponseEntity<List<GroupPreviewDTO>> getRecommendedGroups(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
@@ -73,8 +88,16 @@ public class SocialController {
     public ResponseEntity<JoinRequest> createJoinRequest(@PathVariable Long groupId, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         JoinRequest joinRequest = joinRequestService.addJoinRequest(uid, groupId);
+        if (joinRequest == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        Map<String, Object> meta = new HashMap<>();
+        meta.put("uid", uid);
+        meta.put("displayName", FirebaseTokenService.getDisplayNameFromUid(uid));
+        chatService.createSystemMessage(groupId, uid, "JOIN_REQUEST", meta);
         return ResponseEntity.status(HttpStatus.CREATED).body(joinRequest);
     }
+
     @PutMapping("group/{groupId}/theme/{theme}")
     public ResponseEntity<Boolean> changeTheme(@PathVariable Long groupId,  @PathVariable String theme, Authentication authentication ) {
         String uid = (String) authentication.getPrincipal();
@@ -83,6 +106,7 @@ public class SocialController {
         chatService.createSystemMessage(groupId, uid, "THEME_CHANGED", map);
         return  new ResponseEntity<>(groupMembershipService.changeTheme(uid, groupId, theme), HttpStatus.OK);
     }
+
     @PutMapping("group/nickname")
     public ResponseEntity<Boolean> changeNickname(Authentication authentication, @RequestBody GroupMemberShortDTO groupMemberShortDTO) {
         String uid = (String) authentication.getPrincipal();
@@ -94,14 +118,12 @@ public class SocialController {
 
         return new ResponseEntity<>(groupMembershipService.changeNickname(uid, groupMemberShortDTO), HttpStatus.OK);
     }
-    @PostMapping("/join-requests/handle")
-    public ResponseEntity<GroupMemberDTO> handleJoinRequest(@RequestBody HandleJoinRequestDTO request,
+
+    @PutMapping("/join-requests/handle")
+    public ResponseEntity<Void> handleJoinRequest(@RequestBody HandleJoinRequestDTO request,
                                                             Authentication authentication) {
-        // Extract the UID of the current (admin) user from the authentication token.
         String uid = (String) authentication.getPrincipal();
 
-        // Check if the current user has the permissions to manage members of the group.
-        // We assume hasPermissions(String uid, Long groupId) checks if adminUid is either admin or co_admin.
         if (!groupMembershipService.hasPermissions(uid, request.getGroupId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -110,26 +132,32 @@ public class SocialController {
         joinRequestService.removeRequest(request.getGroupId(), request.getId());
 
         if(request.isAccepted()) {
-            Map<String, Object> meta = new HashMap<>();
+            Map<String, Object> userMeta = new HashMap<>();
 
             assert groupMemberDTO != null;
-            meta.put("userID", groupMemberDTO.getId());
-            meta.put("displayName", groupMemberDTO.getDisplayName());
+            userMeta.put("uid", groupMemberDTO.getId());
+            userMeta.put("displayName", groupMemberDTO.getDisplayName());
+            userMeta.put("role", groupMemberDTO.getGroupRole().name());
             chatService.createSystemMessage(
                     request.getGroupId(),
                     uid,
                     "USER_JOINED",
-                    meta
+                    userMeta
             );
+
+            Map<String, Object> groupMeta = new HashMap<>();
+            groupMeta.put("groupID", request.getGroupId());
+            chatService.sendDirectSystemMessage(request.getId(), "JOINED_GROUP", groupMeta);
         }
 
-        return ResponseEntity.ok(groupMemberDTO);
+        return ResponseEntity.ok(null);
     }
 
     @DeleteMapping(path="/group/{groupID}")
     public ResponseEntity<Boolean> deleteGroupMember(@PathVariable Long groupID, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
         boolean removed = groupMembershipService.removeUserFromGroup(uid, groupID);
+        chatService.createSystemMessage(groupID, uid, "GROUP_DELETED", null);
         if(removed) return ResponseEntity.ok(true);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
