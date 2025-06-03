@@ -228,4 +228,31 @@ public class SocialController {
         List<GroupPreviewDTO> groups = groupService.getGroupsWhereUserIsNotBasic(uid);
         return ResponseEntity.ok(groups);
     }
+
+    @PostMapping("/images/upload")
+    public ResponseEntity<Map<String, String>> uploadImage(
+            @RequestParam("image") MultipartFile image,
+            Authentication authentication) {
+
+        if (image == null || image.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No image provided"));
+        }
+
+        if (image.getSize() > 5 * 1024 * 1024) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Image too large (max 5MB)"));
+        }
+
+        if (!Objects.requireNonNull(image.getContentType()).startsWith("image/")) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid image type"));
+        }
+
+        try {
+            Image savedImage = imageService.saveImage(image);
+            return ResponseEntity.ok(Map.of("imageUrl", savedImage.getUrl()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to upload image"));
+        }
+    }
 }
+
