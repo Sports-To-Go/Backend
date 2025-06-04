@@ -14,5 +14,5 @@ public class GroupMemberDTO {
     private String id;
     private GroupRole groupRole;
     private String nickname;
-//    private String photoUrl;
+    private String imageUrl;
 }

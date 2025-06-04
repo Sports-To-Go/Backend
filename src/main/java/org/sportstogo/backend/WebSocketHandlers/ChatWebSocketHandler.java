@@ -48,13 +48,11 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        System.out.println("Received: " + message.getPayload());
         chatService.handleNewMessage(session, message.getPayload());
     }
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        System.out.println("WebSocket error: " + exception.getMessage());
         String uid = (String) session.getAttributes().get("uid");
         if (uid != null) {
             chatService.removeUserSession(uid);

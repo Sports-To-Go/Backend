@@ -17,9 +17,11 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     @Query(value = """
         SELECT g.id AS id,
                g.name AS name,
-               COALESCE(g.description, 'No description') AS description
+               COALESCE(g.description, 'No description') AS description,
+               i.url AS imageUrl
         FROM groups g
         LEFT JOIN group_memberships gm ON g.id = gm.group_id
+        LEFT JOIN images i ON g.image_id = i.id
         WHERE g.id NOT IN (
             SELECT group_id
             FROM group_memberships
@@ -30,7 +32,7 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
             FROM join_requests
             WHERE user_id = :uid
         )
-        GROUP BY g.id, g.name, g.description
+        GROUP BY g.id, g.name, g.description, i.url
    \s""", nativeQuery = true)
     List<GroupPreviewDTO> findGroupRecommendations(@Param("uid") String uid);
 

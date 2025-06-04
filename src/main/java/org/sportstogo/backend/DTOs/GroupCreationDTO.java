@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,5 +13,5 @@ import lombok.Setter;
 public class GroupCreationDTO {
     private String name;
     private String description;
-//    private String photoURL;
+    private MultipartFile image;
 }

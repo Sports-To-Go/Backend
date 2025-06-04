@@ -27,8 +27,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, UserService userService) throws Exception {
-        FirebaseAuthenticationFilter firebaseFilter = new FirebaseAuthenticationFilter(firebaseTokenService, userService);
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        FirebaseAuthenticationFilter firebaseFilter = new FirebaseAuthenticationFilter(firebaseTokenService);
         return http
                 .csrf(CsrfConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

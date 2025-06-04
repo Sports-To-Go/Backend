@@ -38,8 +38,10 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
         g.id AS id,
         g.name AS name,
         g.description AS description,
-        g.theme as theme
+        g.theme as theme,
+        i.url AS imageUrl
     FROM group_memberships gm JOIN groups g ON gm.group_id = g.id
+    LEFT JOIN images i ON i.id = g.image_id
     WHERE gm.user_id = :uid
     """, nativeQuery = true)
     List<GroupDataDTO> findAllByUserID(@Param("uid") String uid);

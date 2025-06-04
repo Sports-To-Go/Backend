@@ -9,7 +9,4 @@ public enum Theme {
     SAKURA,
     DARKNESS,
     SOFT,
-    WINDOWS,
-    ELDEN_RING,
-    PIXEL_DREAM
 }
