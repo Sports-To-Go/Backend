@@ -5,10 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.sportstogo.backend.DTOs.LocationDTO;
 import org.sportstogo.backend.Enums.Sport;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name="Locations")
@@ -76,9 +80,9 @@ public class Location {
     /**
      *
      */
-    /*@OneToMany(cascade = CascadeType.ALL,mappedBy = "location")
-    private List<Location_Image> images=new ArrayList<>();
-     */
+    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LocationImage> images = new ArrayList<>();
+
     /**
      * the date when the location was added to the system
      */
@@ -103,5 +107,33 @@ public class Location {
         this.openingTime = openingTime;
         this.closingTime = closingTime;
     }
+
+    public static LocationDTO mapToDTO(Location location) {
+        List<String> imageUrls = location.getImages() == null ? List.of() :
+                location.getImages().stream()
+                        .map(LocationImage::getImage)
+                        .filter(Objects::nonNull)
+                        .map(Image::getUrl)
+                        .toList();
+
+        return new LocationDTO(
+                location.getId(),
+                location.getName(),
+                location.getAddress(),
+                location.getLongitude(),
+                location.getLatitude(),
+                location.getCreatedBy(),
+                location.getDescription(),
+                location.getSport(),
+                location.getCalendarId(),
+                location.getHourlyRate(),
+                location.getOpeningTime(),
+                location.getClosingTime(),
+                location.isVerified(),
+                imageUrls
+        );
+    }
+
+
 
 }
