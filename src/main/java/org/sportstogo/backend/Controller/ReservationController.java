@@ -28,7 +28,7 @@ public class ReservationController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Reservation>> getReservationsByUserId(@PathVariable Long userId) {
+    public ResponseEntity<List<Reservation>> getReservationsByUserId(@PathVariable String userId) {
         List<Reservation> reservations = reservationService.getReservationsByUserId(userId);
         if (reservations.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

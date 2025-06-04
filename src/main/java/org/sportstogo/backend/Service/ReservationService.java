@@ -25,7 +25,7 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-     public List<Reservation> getReservationsByUserId(Long userId) {
+     public List<Reservation> getReservationsByUserId(String userId) {
         return reservationRepository.findByUserId(userId);
      }
 
