@@ -4,6 +4,7 @@ package org.sportstogo.backend.Service;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.Models.Report;
 import org.sportstogo.backend.Enums.ReportStatus;
+import org.sportstogo.backend.Enums.ReportTargetType;
 import org.sportstogo.backend.Repository.ReportRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -19,6 +21,13 @@ public class ReportService {
 
     public List<Report> getReports() {
         return reportRepository.findAll();
+    }
+
+    public List<Report> getReportsByTargetIdAndType(String targetId, ReportTargetType targetType) {
+        return reportRepository.findAll().stream()
+                .filter(report -> report.getTargetId().equals(targetId))
+                .filter(report -> report.getTargetType() == targetType)
+                .collect(Collectors.toList());
     }
 
     public void addReport(Report report) {

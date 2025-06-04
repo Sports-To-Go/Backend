@@ -6,6 +6,7 @@ import org.sportstogo.backend.Models.Reservation;
 import org.sportstogo.backend.Service.ReservationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 /**
@@ -24,6 +25,15 @@ public class ReservationController {
     @GetMapping
     public List<Reservation> getReservations() {
         return reservationService.getReservations();
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Reservation>> getReservationsByUserId(@PathVariable Long userId) {
+        List<Reservation> reservations = reservationService.getReservationsByUserId(userId);
+        if (reservations.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        return ResponseEntity.ok(reservations);
     }
 
     @PostMapping
