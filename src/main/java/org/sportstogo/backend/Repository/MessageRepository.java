@@ -65,4 +65,8 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     @Query("SELECT m FROM Message m WHERE m.groupID.id = :groupId AND m.type = :type")
     List<Message> findByGroupIdAndType(@Param("groupId") Long groupId, @Param("type") MessageType type);
 
+    @Modifying
+    @Query("UPDATE Message m SET m.userID.uid = :newUid WHERE m.userID.uid = :oldUid")
+    void updateUserReferences(@Param("oldUid") String oldUid, @Param("newUid") String newUid);
+
 }

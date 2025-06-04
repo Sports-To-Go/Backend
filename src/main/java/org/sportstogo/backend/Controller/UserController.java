@@ -71,5 +71,10 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-
+    @DeleteMapping("/profile")
+    public ResponseEntity<Void> deleteProfile(Authentication authentication) {
+        String uid = (String) authentication.getPrincipal();
+        userService.deleteUserAndTransferOwnership(uid);
+        return ResponseEntity.noContent().build();
+    }
 }

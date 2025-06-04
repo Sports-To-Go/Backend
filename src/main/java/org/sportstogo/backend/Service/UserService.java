@@ -3,17 +3,30 @@ package org.sportstogo.backend.Service;
 import com.google.firebase.auth.UserRecord;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.Exceptions.UserNotFoundException;
+import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.Models.Image;
 import org.sportstogo.backend.Models.User;
+import org.sportstogo.backend.Repository.GroupRepository;
 import org.sportstogo.backend.Repository.ImageRepository;
+import org.sportstogo.backend.Repository.MessageRepository;
 import org.sportstogo.backend.Repository.UserRepository;
 import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
+import org.sportstogo.backend.Repository.GroupMembershipRepository;
+
+import java.util.List;
+import java.util.Optional;
+
 
 @Service
 @AllArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
+    private final GroupRepository groupRepository;
+    private final MessageRepository messageRepository;
+    private final GroupMembershipRepository groupMembershipRepository;
+
 
     public User getUserByUid(String uid) {
         return userRepository.findById(uid)
@@ -50,6 +63,36 @@ public class UserService {
 
         return userRepository.save(user);
     }
+
+    @Transactional
+    public void deleteUserAndTransferOwnership(String uid) {
+        Optional<User> optionalUser = userRepository.findById(uid);
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        User userToDelete = optionalUser.get();
+
+        User undefinedUser = userRepository.findById("undefined")
+                .orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setUid("undefined");
+                    newUser.setDescription("Deleted User");
+                    newUser.setDisplayName("Deleted User");
+                    return userRepository.save(newUser);
+                });
+
+        messageRepository.updateUserReferences(uid, "undefined");
+
+        groupRepository.updateCreatedBy(uid, "undefined");
+
+        List<GroupMembership> memberships = groupMembershipRepository.findByUserID_Uid(uid);
+        groupMembershipRepository.deleteAll(memberships);
+
+        userRepository.delete(userToDelete);
+    }
+
+
 
     public void saveUser(User user) {
         userRepository.save(user);
