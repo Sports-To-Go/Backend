@@ -206,6 +206,21 @@ public class AdminController {
         return ResponseEntity.ok(reportService.getReports());
     }
 
+    @GetMapping(path = "/reports/targetUser/{targetId}")
+    public ResponseEntity<List<Report>> getReportsForTargetUser(@PathVariable String targetId, Authentication authentication) {
+        String authenticatedUid = (String) authentication.getPrincipal();
+
+        if (!authenticatedUid.equals(targetId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN); 
+        }
+
+        List<Report> reports = reportService.getReportsByTargetIdAndType(targetId, ReportTargetType.User);
+        if (reports.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        return ResponseEntity.ok(reports);
+    }
+
     @GetMapping(path = "reports/info")
     public ResponseEntity<List<ReportInfoDTO>> getReportInfo(Authentication authentication) {
         String uid = (String) authentication.getPrincipal();

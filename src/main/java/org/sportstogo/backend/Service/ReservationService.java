@@ -25,6 +25,10 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
+     public List<Reservation> getReservationsByUserId(Long userId) {
+        return reservationRepository.findByUserId(userId);
+     }
+
     public ResponseEntity<String> addReservation(Reservation reservation) {
         Optional<Location> locationOp = locationRepository.findById(reservation.getLocationId());
         if (locationOp.isEmpty()) {
