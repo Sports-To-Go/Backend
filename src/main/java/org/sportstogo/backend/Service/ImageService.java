@@ -82,4 +82,36 @@ public class ImageService {
             throw new RuntimeException("Failed to upload image to S3", e);
         }
     }
+
+    private void deleteImageFromS3(String url) {
+        try {
+            String filename = url.substring(url.lastIndexOf("/") + 1);
+
+            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
+            AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                    .withRegion(Regions.US_EAST_1)
+                    .build();
+
+            s3Client.deleteObject(s3BucketName, filename);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete image from S3", e);
+        }
+    }
+
+    public void deleteImageEntity(Image image) {
+        if (image.getUrl().contains(".s3.amazonaws.com/")) deleteImageFromS3(image.getUrl());
+        imageRepository.delete(image);
+    }
+
+    public void deleteImageByUrl(String url) {
+        Image image = imageRepository.findByUrl(url);
+        if (image != null) {
+            deleteImageEntity(image);
+        } else {
+            throw new IllegalArgumentException("Image not found with URL: " + url);
+        }
+    }
+
+
 }

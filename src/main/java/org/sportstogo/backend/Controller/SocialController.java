@@ -5,13 +5,11 @@ import org.sportstogo.backend.DTOs.*;
 import org.sportstogo.backend.Models.Group;
 import org.sportstogo.backend.Models.Image;
 import org.sportstogo.backend.Models.JoinRequest;
-import org.sportstogo.backend.Models.Message;
-import org.sportstogo.backend.Repository.GroupMembershipRepository;
+import org.sportstogo.backend.Models.User;
 import org.sportstogo.backend.Service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,6 +30,7 @@ public class SocialController {
     private final MessageService messageService;
     private final ChatService chatService;
     private final ImageService imageService;
+    private final UserService userService;
 
     @GetMapping(path="/groups")
     public ResponseEntity<List<GroupDataDTO>> getGroups(Authentication authentication) {
@@ -114,7 +113,7 @@ public class SocialController {
         }
         Map<String, Object> meta = new HashMap<>();
         meta.put("uid", uid);
-        meta.put("displayName", FirebaseTokenService.getDisplayNameFromUid(uid));
+        meta.put("displayName", userService.getUserByUid(uid).getDisplayName());
         chatService.createSystemMessage(groupId, uid, "JOIN_REQUEST", meta);
         return ResponseEntity.status(HttpStatus.CREATED).body(joinRequest);
     }
@@ -159,6 +158,7 @@ public class SocialController {
             userMeta.put("uid", groupMemberDTO.getId());
             userMeta.put("displayName", groupMemberDTO.getDisplayName());
             userMeta.put("role", groupMemberDTO.getGroupRole().name());
+            userMeta.put("imageUrl", groupMemberDTO.getImageUrl());
             chatService.createSystemMessage(
                     request.getGroupId(),
                     uid,
@@ -187,7 +187,7 @@ public class SocialController {
         Map<String, Object> meta = new HashMap<>();
         meta.put("uid", targetUID);
         meta.put("newRole", newRole);
-        meta.put("displayName", FirebaseTokenService.getDisplayNameFromUid(targetUID));
+        meta.put("displayName", FirebaseTokenService.getDataFromUid(targetUID));
 
         chatService.createSystemMessage(groupID, callerUID, "ROLE_CHANGED", meta);
 
@@ -198,13 +198,22 @@ public class SocialController {
     @DeleteMapping(path="/group/{groupID}")
     public ResponseEntity<Boolean> deleteGroupMember(@PathVariable Long groupID, Authentication authentication) {
         String uid = (String) authentication.getPrincipal();
+
         boolean removed = groupMembershipService.removeUserFromGroup(uid, groupID);
-        if(groupService.exists(groupID)) {
-            chatService.createSystemMessage(groupID, uid, "USER_LEFT", null);
+        if (!removed) return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+        Map<String, Object> meta = new HashMap<>();
+        meta.put("displayName", userService.getUserByUid(uid).getDisplayName());
+        chatService.createSystemMessage(groupID, uid, "USER_LEFT", meta);
+
+        // Check if group is now empty
+        if (groupMembershipService.countGroupMembers(groupID) == 0) {
+            groupService.deleteGroup(groupID);
         }
-        if(removed) return ResponseEntity.ok(true);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+        return ResponseEntity.ok(true);
     }
+
 
     @DeleteMapping("/group/{groupID}/members/{targetUID}")
     public ResponseEntity<Void> kickMember(
@@ -216,8 +225,8 @@ public class SocialController {
         chatService.createSystemMessage(groupID, callerUID, "USER_KICKED", Map.of(
                 "uid", targetUID,
                 "kickedBy", callerUID,
-                "kickedByName", FirebaseTokenService.getDisplayNameFromUid(callerUID),
-                "kickedName", FirebaseTokenService.getDisplayNameFromUid(targetUID)
+                "kickedByName", FirebaseTokenService.getDataFromUid(callerUID),
+                "kickedName", FirebaseTokenService.getDataFromUid(targetUID)
         ));;
         return ResponseEntity.ok().build();
     }
@@ -248,7 +257,7 @@ public class SocialController {
 
         try {
             Image savedImage = imageService.saveImage(image);
-            return ResponseEntity.ok(Map.of("imageUrl", savedImage.getUrl()));
+            return ResponseEntity.ok(Map.of("imageUrl", savedImage.getUrl(), "imageId", savedImage.getId().toString()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to upload image"));

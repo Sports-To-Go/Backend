@@ -1,13 +1,13 @@
 package org.sportstogo.backend.Repository;
 
 import jakarta.transaction.Transactional;
-import org.hibernate.type.descriptor.jdbc.SmallIntJdbcType;
 import org.sportstogo.backend.Models.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.sportstogo.backend.Enums.MessageType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,10 +39,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     );
 
     @Modifying
-    @Transactional
-    @Query("DELETE FROM Message m WHERE m.groupID.id = :groupId")
-    void deleteAllByGroupId(@Param("groupId") Long groupId);
-
     @Query(value = """
     INSERT INTO messages (id, group_id, user_id, content, time_sent, type, system_event, meta_data)
     VALUES (nextval('message_id_seq'), :groupId, :userId, :content, :timeSent, :type, :system_event, :meta_data)
@@ -55,4 +51,18 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
                                @Param("type") Integer type,
                                @Param("system_event") String system_event,
                                @Param("meta_data") String meta_data);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Message m WHERE m.groupID.id = :groupId AND m.type IN :types")
+    void deleteByGroupIdAndTypeIn(@Param("groupId") Long groupId, @Param("types") List<MessageType> types);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Message m WHERE m.groupID.id = :groupId AND m.type = :type")
+    void deleteByGroupIdAndType(@Param("groupId") Long groupId, @Param("type") MessageType type);
+
+    @Query("SELECT m FROM Message m WHERE m.groupID.id = :groupId AND m.type = :type")
+    List<Message> findByGroupIdAndType(@Param("groupId") Long groupId, @Param("type") MessageType type);
+
 }

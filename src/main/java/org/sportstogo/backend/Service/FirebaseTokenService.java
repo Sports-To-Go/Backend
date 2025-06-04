@@ -18,10 +18,9 @@ public class FirebaseTokenService {
         }
     }
 
-    public static String getDisplayNameFromUid(String uid) {
+    public static UserRecord getDataFromUid(String uid) {
         try {
-            UserRecord userRecord = FirebaseAuth.getInstance().getUser(uid);
-            return userRecord.getDisplayName();
+            return FirebaseAuth.getInstance().getUser(uid);
         } catch (FirebaseAuthException e) {
             throw new RuntimeException("Failed to retrieve display name from Firebase ID: " + e.getMessage());
         }

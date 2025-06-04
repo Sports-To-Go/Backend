@@ -3,12 +3,10 @@ package org.sportstogo.backend.Service;
 import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.*;
 import org.sportstogo.backend.Enums.GroupRole;
+import org.sportstogo.backend.Enums.MessageType;
 import org.sportstogo.backend.Exceptions.UserNotFoundException;
 import org.sportstogo.backend.Models.*;
-import org.sportstogo.backend.Repository.GroupMembershipRepository;
-import org.sportstogo.backend.Repository.GroupRepository;
-import org.sportstogo.backend.Repository.JoinRequestRepository;
-import org.sportstogo.backend.Repository.UserRepository;
+import org.sportstogo.backend.Repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +18,8 @@ public class GroupService {
     private final GroupMembershipRepository groupMembershipRepository;
     private final UserRepository userRepository;
     private final JoinRequestRepository joinRequestRepository;
+    private final MessageRepository messageRepository;
+    private final ImageService imageService;
 
     public Group createGroup(String name, String description, String uid, Image image) {
         User creator = userRepository.findById(uid).orElse(null);
@@ -49,15 +49,7 @@ public class GroupService {
         for(GroupDataDTO groupDataDTO : groupData) {
             Long id = groupDataDTO.getId();
 
-            List<GroupMembership> memberships = groupMembershipRepository.findByGroupID(id);
-            List<GroupMemberDTO> groupMembers = memberships.stream()
-                .map(membership -> new GroupMemberDTO(
-                        FirebaseTokenService.getDisplayNameFromUid(membership.getUserID().getUid()),
-                        membership.getUserID().getUid(),
-                        membership.getGroupRole(),
-                        membership.getNickname()
-                ))
-                .toList();
+            List<GroupMemberDTO> groupMembers = groupMembershipRepository.findByGroupID(id).stream().map(GroupMembership::toDTO).toList();
             groupDataDTO.setGroupMembers(groupMembers);
 
             List<JoinRequest> joinRequests = joinRequestRepository.findByGroupID(id);
@@ -71,15 +63,7 @@ public class GroupService {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new IllegalArgumentException("Group not found with id: " + groupId));
 
-        List<GroupMembership> memberships = groupMembershipRepository.findByGroupID(groupId);
-        List<GroupMemberDTO> groupMembers = memberships.stream()
-                .map(membership -> new GroupMemberDTO(
-                        FirebaseTokenService.getDisplayNameFromUid(membership.getUserID().getUid()),
-                        membership.getUserID().getUid(),
-                        membership.getGroupRole(),
-                        membership.getNickname()
-                ))
-                .toList();
+        List<GroupMemberDTO> groupMembers = groupMembershipRepository.findByGroupID(groupId).stream().map(GroupMembership::toDTO).toList();
 
         List<JoinRequest> joinRequests = joinRequestRepository.findByGroupID(groupId);
         List<JoinRequestDTO> joinRequestDTOs = joinRequests.stream().map(JoinRequest::toDTO).toList();
@@ -95,7 +79,37 @@ public class GroupService {
         return groupMembershipRepository.findGroupsWhereUserHasElevatedRole(uid);
     }
 
-    public boolean exists(Long groupID) {
-        return groupRepository.existsById(groupID);
+    public void deleteGroup(Long groupId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
+
+        // Step 1: Delete TEXT and SYSTEM messages
+        messageRepository.deleteByGroupIdAndTypeIn(groupId, List.of(MessageType.TEXT, MessageType.SYSTEM));
+
+        // Step 2: Get all IMAGE messages for this group
+        List<Message> imageMessages = messageRepository.findByGroupIdAndType(groupId, MessageType.IMAGE);
+
+        // Step 3: Delete associated images from S3
+        for (Message message : imageMessages) {
+            String url = message.getContent();
+            imageService.deleteImageByUrl(url);
+        }
+
+        // Step 4: Delete IMAGE messages
+        messageRepository.deleteByGroupIdAndType(groupId, MessageType.IMAGE);
+
+        // Step 5: Delete join requests
+        joinRequestRepository.deleteAllByGroupId(groupId);
+
+        // Step 6: Delete group image (if hosted in S3)
+        if (group.getImage() != null) {
+            Image image = group.getImage();
+            group.setImage(null);
+            groupRepository.save(group);
+            imageService.deleteImageEntity(image);
+        }
+
+        groupRepository.delete(group);
     }
+
 }
