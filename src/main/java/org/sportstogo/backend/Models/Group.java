@@ -37,6 +37,10 @@ public class Group {
     @Column(nullable = false)
     private Theme theme = Theme.DEFAULT;
 
+    @ManyToOne
+    @JoinColumn(name = "image_id", referencedColumnName = "id")
+    private Image image;
+
     @PrePersist
     protected void onCreate() {
         this.createdDate = LocalDate.now();

@@ -21,11 +21,9 @@ import java.util.List;
 public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 
     private final FirebaseTokenService firebaseTokenService;
-    private final UserService userService;
 
-    public FirebaseAuthenticationFilter(FirebaseTokenService firebaseTokenService, UserService userService) {
+    public FirebaseAuthenticationFilter(FirebaseTokenService firebaseTokenService) {
         this.firebaseTokenService = firebaseTokenService;
-        this.userService = userService;
     }
 
     @Override

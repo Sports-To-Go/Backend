@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.sportstogo.backend.DTOs.GroupMemberDTO;
 import org.sportstogo.backend.Enums.GroupRole;
 import org.sportstogo.backend.idModels.GroupMemberID;
 
@@ -39,5 +40,17 @@ public class GroupMembership {
     @PrePersist
     protected void onCreate() {
         this.joinTime = LocalDateTime.now();
+    }
+
+    public GroupMemberDTO toDTO() {
+        GroupMemberDTO dto = new GroupMemberDTO();
+        dto.setDisplayName(userID.getDisplayName());
+        dto.setId(userID.getUid());
+        dto.setGroupRole(groupRole);
+        dto.setNickname(nickname);
+        if (userID.getImage() != null) {
+            dto.setImageUrl(userID.getImage().getUrl());
+        }
+        return dto;
     }
 }

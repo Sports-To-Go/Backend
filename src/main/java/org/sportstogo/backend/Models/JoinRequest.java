@@ -38,7 +38,7 @@ public class JoinRequest {
 
     public JoinRequestDTO toDTO() {
         JoinRequestDTO dto = new JoinRequestDTO();
-        dto.setDisplayName(FirebaseTokenService.getDisplayNameFromUid(userID.getUid()));
+        dto.setDisplayName(userID.getDisplayName());
         dto.setId(userID.getUid());
         return dto;
     }

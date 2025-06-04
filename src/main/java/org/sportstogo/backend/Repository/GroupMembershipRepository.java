@@ -38,8 +38,10 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
         g.id AS id,
         g.name AS name,
         g.description AS description,
-        g.theme as theme
+        g.theme as theme,
+        i.url AS imageUrl
     FROM group_memberships gm JOIN groups g ON gm.group_id = g.id
+    LEFT JOIN images i ON i.id = g.image_id
     WHERE gm.user_id = :uid
     """, nativeQuery = true)
     List<GroupDataDTO> findAllByUserID(@Param("uid") String uid);
@@ -56,4 +58,6 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
     @Query("UPDATE GroupMembership gm SET gm.nickname = :nickname WHERE gm.userID.uid = :userId AND gm.groupID.id = :groupId")
     void updateNickname(@Param("userId") String userId, @Param("groupId") Long groupId, @Param("nickname") String nickname);
 
+    @Query("SELECT gm FROM GroupMembership gm WHERE gm.userID.uid = :uid")
+    List<GroupMembership> findByUserID_Uid(@Param("uid") String uid);
 }

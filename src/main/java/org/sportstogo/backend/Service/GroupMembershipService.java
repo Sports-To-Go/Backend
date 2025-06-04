@@ -33,14 +33,6 @@ public class GroupMembershipService {
         if (membership == null) return false;
 
         groupMembershipRepository.delete(membership);
-
-        // Check if the group still has any members
-        if (!groupMembershipRepository.existsByGroupID(groupID)) {
-            // If no members remain, remove all associated messages and then delete the group
-            messageRepository.deleteAllByGroupId(groupID);
-            joinRequestRepository.deleteAllByGroupId(groupID);
-            groupRepository.deleteById(groupID);
-        }
         return true;
     }
 
@@ -92,14 +84,14 @@ public class GroupMembershipService {
 
         // Retrieve the group
         Optional<Group> groupOptional = groupRepository.findById(groupId);
-        if (!groupOptional.isPresent()) {
+        if (groupOptional.isEmpty()) {
             throw new IllegalArgumentException("Group with ID " + groupId + " not found.");
         }
         Group group = groupOptional.get();
 
         // Retrieve the user
         Optional<User> userOptional = userRepository.findById(id);
-        if (!userOptional.isPresent()) {
+        if (userOptional.isEmpty()) {
             throw new IllegalArgumentException("User with ID " + id + " not found.");
         }
         User user = userOptional.get();
@@ -113,13 +105,7 @@ public class GroupMembershipService {
         // Save the new membership
         GroupMembership savedMembership = groupMembershipRepository.save(newMembership);
 
-        // Create a GroupMemberDTO from the saved membership
-        GroupMemberDTO dto = new GroupMemberDTO();
-        dto.setDisplayName(FirebaseTokenService.getDisplayNameFromUid(id));
-        dto.setId(id);
-        dto.setGroupRole(savedMembership.getGroupRole());
-
-        return dto;
+        return savedMembership.toDTO();
     }
 
     public boolean changeTheme(String uid, Long groupId, String theme) {
@@ -136,5 +122,9 @@ public class GroupMembershipService {
                     groupMemberShortDTO.getNickname());
         } else return false;
         return false;
+    }
+
+    public int countGroupMembers(Long groupId) {
+        return groupMembershipRepository.findByGroupID(groupId).size(); // or use count query
     }
 }
