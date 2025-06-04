@@ -4,10 +4,12 @@ package org.sportstogo.backend.Controller;
 import org.sportstogo.backend.Models.Location;
 import org.sportstogo.backend.Enums.Sport;
 import org.sportstogo.backend.Service.LocationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +39,18 @@ public class LocationController {
                                                       @RequestParam(required = false) LocalTime end,
                                                       @RequestParam(required = false) String price) {
         return locationService.getFiltered(sport, start, end, price);
+    }
+
+    @GetMapping("/{uid}")
+    public ResponseEntity<?> getAllByUserId(@PathVariable String uid){
+        List<Location> locations = new ArrayList<>();
+        try{
+            locations = this.locationService.getLocationByUserId(uid);
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error " + e);
+        }
+
+        return ResponseEntity.ok().body(locations);
     }
 
     /**

@@ -22,4 +22,5 @@ public interface LocationRepository extends JpaRepository<Location,Long> {
 
     @Query("Select l from Location l where l.verified=true")
     List<Location> findVerified();
+    List<Location> findAllByCreatedBy(String createdBy);
 }

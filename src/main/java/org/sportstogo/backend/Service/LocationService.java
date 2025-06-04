@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -136,5 +137,9 @@ public class LocationService {
                         new IllegalArgumentException("Location with id " + id + " not found")
                 );
 
+    }
+
+    public List<Location> getLocationByUserId(String uID){
+      return this.locationRepository.findAllByCreatedBy(uID);
     }
 }
