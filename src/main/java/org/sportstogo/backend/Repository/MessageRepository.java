@@ -38,7 +38,6 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             @Param("timestamp") LocalDateTime timestamp
     );
 
-    @Modifying
     @Query(value = """
     INSERT INTO messages (id, group_id, user_id, content, time_sent, type, system_event, meta_data)
     VALUES (nextval('message_id_seq'), :groupId, :userId, :content, :timeSent, :type, :system_event, :meta_data)

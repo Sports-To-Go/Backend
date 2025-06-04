@@ -13,7 +13,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByLocationId(Long locationId);
 
     @Query("SELECT r FROM Reservation r WHERE r.userId = ?1")
-    List<Reservation> findByUserId(Long userId);
+    List<Reservation> findByUserId(String userId);
 
     @Query("SELECT r FROM Reservation r WHERE r.groupId = ?1")
     List<Reservation> findByGroupId(Long groupId);

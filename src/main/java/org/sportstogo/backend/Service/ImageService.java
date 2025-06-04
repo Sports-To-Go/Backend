@@ -59,9 +59,15 @@ public class ImageService {
         }
     }
 
+    private String getExtension(String filename) {
+        if (filename == null || !filename.contains(".")) return null;
+        return filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+    }
+
     private String saveImageToS3(MultipartFile file) {
         try {
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            String fileExtension = getExtension(file.getOriginalFilename());
+            String safeFileName = UUID.randomUUID() + (fileExtension != null ? "." + fileExtension : "");
 
             BasicAWSCredentials awsCredentials = new BasicAWSCredentials(s3AccessKey, s3SecretKey);
             AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
@@ -73,11 +79,11 @@ public class ImageService {
             metadata.setContentType(file.getContentType());
             metadata.setContentLength(file.getSize());
 
-            PutObjectRequest putObjectRequest = new PutObjectRequest(s3BucketName, fileName, file.getInputStream(), metadata);
+            PutObjectRequest putObjectRequest = new PutObjectRequest(s3BucketName, safeFileName, file.getInputStream(), metadata);
 
             s3Client.putObject(putObjectRequest);
 
-            return "https://" + s3BucketName + ".s3.amazonaws.com/" + fileName;
+            return "https://" + s3BucketName + ".s3.amazonaws.com/" + safeFileName;
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload image to S3", e);
         }
