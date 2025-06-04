@@ -70,14 +70,6 @@ public class LocationService {
         return ResponseEntity.status(HttpStatus.CREATED).body("Location successfully added");
     }
 
-    public ResponseEntity<String> deleteById(Long id) {
-        if (locationRepository.findById(id).isEmpty()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Location not found");
-        }
-        locationRepository.deleteById(id);
-        return ResponseEntity.status(HttpStatus.OK).body("Location successfully deleted");
-    }
-
     @Transactional
     public ResponseEntity<String> updateLocation(Long id, String name) {
         Optional<Location> locationOp = locationRepository.findById(id);
@@ -124,6 +116,34 @@ public class LocationService {
         return Location.mapToDTO(savedLocation);
     }
 
+    @Transactional
+    public ResponseEntity<String> deleteById(Long id) {
+        Optional<Location> locationOpt = locationRepository.findById(id);
+        if (locationOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Location not found");
+        }
+
+        Location location = locationOpt.get();
+
+        // Delete associated images and their mappings
+        location.getImages().forEach(locationImage -> {
+            Image image = locationImage.getImage();
+
+            // Delete the join table entry
+            locationImageRepository.delete(locationImage);
+
+            // Delete the actual image (from DB and S3)
+            imageService.deleteImageEntity(image);
+        });
+
+        // Finally delete the location
+        locationRepository.delete(location);
+
+        return ResponseEntity.ok("Location successfully deleted");
+    }
+
+
+
 
     @Transactional(readOnly = true)
     public List<LocationDTO> getAllLocationDTOs() {
@@ -146,6 +166,16 @@ public class LocationService {
         return locations.stream()
                 .map(Location::mapToDTO)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Location getLocationById(Long id) {
+        return locationRepository.findById(id)
+                .map(location -> {
+                    location.getImages().size(); // <-- force loading lazy collection
+                    return location;
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
     }
 
 }

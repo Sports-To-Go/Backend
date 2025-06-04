@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import jakarta.transaction.Transactional;
 
+import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.NameDTO;
 import org.sportstogo.backend.DTOs.ReportDTO;
 
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "admin")
+@AllArgsConstructor
 public class AdminController {
 
     private final AdminService adminService;
@@ -33,14 +35,7 @@ public class AdminController {
     private final BanService banService;
     private final BugService bugService;
     private final LocationService locationService;
-
-    public AdminController(AdminService adminService, ReportService reportService, BanService banService, BugService bugService, LocationService locationService) {
-        this.adminService = adminService;
-        this.reportService = reportService;
-        this.banService = banService;
-        this.bugService = bugService;
-        this.locationService = locationService;
-    }
+    private final UserService userService;
 
     @GetMapping(path = "recent-users")
     public ResponseEntity<List<User>> getRecentUsers(Authentication authentication) {
@@ -554,14 +549,18 @@ public class AdminController {
 
         try{
             String name = "";
+            String imageUrl = null;
             if(type == ReportTargetType.User){
-                UserRecord userRecord = FirebaseAuth.getInstance().getUser(id);
-                name = userRecord.getDisplayName();
+                name = userService.getUserById(id).getDisplayName();
             }else if(type == ReportTargetType.Location){
-                name = locationService.getLocationNameById(Long.parseLong(id));
+                Location location = locationService.getLocationById(Long.parseLong(id));
+                name = location.getName();
+                if (!location.getImages().isEmpty()) {
+                    imageUrl = location.getImages().getFirst().getImage().getUrl();
+                }
             }
-            return ResponseEntity.ok(new NameDTO(name));
-        }catch (FirebaseAuthException e){
+            return ResponseEntity.ok(new NameDTO(name, imageUrl));
+        }catch (Exception e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
