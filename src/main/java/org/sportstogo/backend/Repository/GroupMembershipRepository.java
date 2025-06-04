@@ -58,4 +58,6 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
     @Query("UPDATE GroupMembership gm SET gm.nickname = :nickname WHERE gm.userID.uid = :userId AND gm.groupID.id = :groupId")
     void updateNickname(@Param("userId") String userId, @Param("groupId") Long groupId, @Param("nickname") String nickname);
 
+    @Query("SELECT gm FROM GroupMembership gm WHERE gm.userID.uid = :uid")
+    List<GroupMembership> findByUserID_Uid(@Param("uid") String uid);
 }
