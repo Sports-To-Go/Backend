@@ -1,7 +1,7 @@
 package org.sportstogo.backend.Service;
 
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.sportstogo.backend.DTOs.ReservationDTO;
 import org.sportstogo.backend.Models.Location;
 import org.sportstogo.backend.Models.Reservation;
 import org.sportstogo.backend.Repository.LocationRepository;
@@ -9,6 +9,7 @@ import org.sportstogo.backend.Repository.ReservationRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -28,6 +29,33 @@ public class ReservationService {
      public List<Reservation> getReservationsByUserId(String userId) {
         return reservationRepository.findByUserId(userId);
      }
+
+    @Transactional(readOnly = true)
+    public List<ReservationDTO> getReservationsByUserIdWithLocationInfo(String userId) {
+        List<Reservation> reservations = reservationRepository.findByUserId(userId);
+
+        return reservations.stream().map(reservation -> {
+            Location location = locationRepository.findById(reservation.getLocationId())
+                    .orElse(null);
+
+            String imageUrl = location != null && location.getImages() != null && !location.getImages().isEmpty()
+                    ? location.getImages().get(0).getImage().getUrl()
+                    : null;
+
+            return new ReservationDTO(
+                    reservation.getId(),
+                    reservation.getLocationId(),
+                    location != null ? location.getName() : null,
+                    imageUrl,
+                    reservation.getUserId(),
+                    reservation.getStartTime(),
+                    reservation.getEndTime(),
+                    reservation.getDate(),
+                    reservation.getPaymentStatus().name(),
+                    reservation.getTotalCost()
+            );
+        }).toList();
+    }
 
     public ResponseEntity<String> addReservation(Reservation reservation) {
         Optional<Location> locationOp = locationRepository.findById(reservation.getLocationId());
