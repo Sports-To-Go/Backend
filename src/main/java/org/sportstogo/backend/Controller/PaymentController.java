@@ -3,6 +3,7 @@ package org.sportstogo.backend.Controller;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -43,9 +44,10 @@ public class PaymentController {
         LocalDate periodStart = LocalDate.now().withDayOfMonth(1);
         PeriodType periodType = PeriodType.MONTHLY;
 
-        Optional<Revenue> optionalRevenue = revenueRepository.findByPeriodStartAndPeriodType(periodStart, periodType);
-        if (optionalRevenue.isPresent()) {
-            Revenue existingRevenue = optionalRevenue.get();
+        List<Revenue> optionalRevenue = revenueRepository.findByPeriodStartAndPeriodType(periodStart, periodType);
+        List<Revenue> revenues = revenueRepository.findByPeriodStartAndPeriodType(periodStart, periodType);
+        if (!revenues.isEmpty()) {
+            Revenue existingRevenue = revenues.get(0); // sau gestionează toate dacă vrei
             existingRevenue.setTotalAmount(existingRevenue.getTotalAmount() + revenueAmount);
             revenueRepository.save(existingRevenue);
         } else {
