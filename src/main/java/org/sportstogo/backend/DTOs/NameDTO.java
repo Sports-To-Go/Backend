@@ -6,4 +6,5 @@ import lombok.Getter;
 @Getter
 public class NameDTO {
     private final String name;
+    private String imageUrl;
 }

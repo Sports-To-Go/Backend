@@ -2,6 +2,7 @@ package org.sportstogo.backend.Service;
 
 import com.google.firebase.auth.UserRecord;
 import lombok.AllArgsConstructor;
+import org.sportstogo.backend.Controller.AdminController;
 import org.sportstogo.backend.Exceptions.UserNotFoundException;
 import org.sportstogo.backend.Models.GroupMembership;
 import org.sportstogo.backend.Models.Image;
@@ -101,5 +102,10 @@ public class UserService {
 
     public boolean userExists(String uid) {
         return userRepository.existsById(uid);
+    }
+
+    public User getUserById(String id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + id + " not found"));
     }
 }

@@ -2,6 +2,7 @@ package org.sportstogo.backend.Controller;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.sportstogo.backend.DTOs.ReservationDTO;
 import org.sportstogo.backend.Models.Reservation;
 import org.sportstogo.backend.Service.ReservationService;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +29,8 @@ public class ReservationController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Reservation>> getReservationsByUserId(@PathVariable String userId) {
-        List<Reservation> reservations = reservationService.getReservationsByUserId(userId);
+    public ResponseEntity<List<ReservationDTO>> getReservationsByUserId(@PathVariable String userId) {
+        List<ReservationDTO> reservations = reservationService.getReservationsByUserIdWithLocationInfo(userId);
         if (reservations.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }

@@ -5,9 +5,11 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import jakarta.transaction.Transactional;
 
+import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.NameDTO;
 import org.sportstogo.backend.DTOs.ReportDTO;
 
+import org.sportstogo.backend.DTOs.ReportWithUserDTO;
 import org.sportstogo.backend.Enums.ReportStatus;
 import org.sportstogo.backend.Enums.ReportTargetType;
 
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "admin")
+@AllArgsConstructor
 public class AdminController {
 
     private final AdminService adminService;
@@ -33,14 +36,7 @@ public class AdminController {
     private final BanService banService;
     private final BugService bugService;
     private final LocationService locationService;
-
-    public AdminController(AdminService adminService, ReportService reportService, BanService banService, BugService bugService, LocationService locationService) {
-        this.adminService = adminService;
-        this.reportService = reportService;
-        this.banService = banService;
-        this.bugService = bugService;
-        this.locationService = locationService;
-    }
+    private final UserService userService;
 
     @GetMapping(path = "recent-users")
     public ResponseEntity<List<User>> getRecentUsers(Authentication authentication) {
@@ -207,19 +203,56 @@ public class AdminController {
     }
 
     @GetMapping(path = "/reports/targetUser/{targetId}")
-    public ResponseEntity<List<Report>> getReportsForTargetUser(@PathVariable String targetId, Authentication authentication) {
+    public ResponseEntity<List<ReportWithUserDTO>> getReportsForTargetUser(
+            @PathVariable String targetId,
+            Authentication authentication) {
+
         String authenticatedUid = (String) authentication.getPrincipal();
 
         if (!authenticatedUid.equals(targetId)) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN); 
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         List<Report> reports = reportService.getReportsByTargetIdAndType(targetId, ReportTargetType.User);
+
         if (reports.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
-        return ResponseEntity.ok(reports);
+
+        List<ReportWithUserDTO> enrichedReports = reports.stream().map(report -> {
+            String imageUrl = null;
+            try {
+                var reporter = userService.getUserById(report.getReportedBy());
+
+                if (reporter.getImage() != null) {
+                    imageUrl = reporter.getImage().getUrl();
+                }
+
+                return new ReportWithUserDTO(
+                        report.getId(),
+                        report.getReason(),
+                        report.getCreatedAt(),
+                        reporter.getDisplayName(),
+                        report.getTargetId(),
+                        report.getTargetType().name(),
+                        imageUrl
+                );
+            } catch (Exception ignored) {
+                return new ReportWithUserDTO(
+                        report.getId(),
+                        report.getReason(),
+                        report.getCreatedAt(),
+                        report.getReportedBy(),
+                        report.getTargetId(),
+                        report.getTargetType().name(),
+                        null
+                );
+            }
+        }).toList();
+
+        return ResponseEntity.ok(enrichedReports);
     }
+
 
     @GetMapping(path = "reports/info")
     public ResponseEntity<List<ReportInfoDTO>> getReportInfo(Authentication authentication) {
@@ -306,16 +339,25 @@ public class AdminController {
         List<ReportDTO> dtos = reportService.getReports().stream()
                 .filter(r -> r.getTargetType().name().equalsIgnoreCase(reportType))
                 .filter(r -> r.getTargetId().equals(targetId))
-                .map(r -> new ReportDTO(
-                        r.getReportedBy(),
-                        r.getReason(),
-                        r.getCreatedAt()
-                ))
+                .map(r -> {
+                    String displayName;
+                    try {
+                        displayName = userService.getUserByUid(r.getReportedBy()).getDisplayName();
+                    } catch (Exception e) {
+                        displayName = "Unknown User";
+                    }
+
+                    return new ReportDTO(
+                            displayName,
+                            r.getReason(),
+                            r.getCreatedAt()
+                    );
+                })
                 .collect(Collectors.toList());
 
-        // Always return 200 OK with list (empty if no matches)
         return ResponseEntity.ok(dtos);
     }
+
 
     /**
      * @param report the Report object to be added; must contain reportedBy, targetType, targetId, reason, and status
@@ -554,14 +596,18 @@ public class AdminController {
 
         try{
             String name = "";
+            String imageUrl = null;
             if(type == ReportTargetType.User){
-                UserRecord userRecord = FirebaseAuth.getInstance().getUser(id);
-                name = userRecord.getDisplayName();
+                name = userService.getUserById(id).getDisplayName();
             }else if(type == ReportTargetType.Location){
-                name = locationService.getLocationNameById(Long.parseLong(id));
+                Location location = locationService.getLocationById(Long.parseLong(id));
+                name = location.getName();
+                if (!location.getImages().isEmpty()) {
+                    imageUrl = location.getImages().getFirst().getImage().getUrl();
+                }
             }
-            return ResponseEntity.ok(new NameDTO(name));
-        }catch (FirebaseAuthException e){
+            return ResponseEntity.ok(new NameDTO(name, imageUrl));
+        }catch (Exception e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }

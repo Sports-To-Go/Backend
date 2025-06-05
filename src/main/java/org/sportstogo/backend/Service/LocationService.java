@@ -1,62 +1,49 @@
 package org.sportstogo.backend.Service;
 
-import jakarta.transaction.Transactional;
+import org.sportstogo.backend.DTOs.LocationDTO;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.AllArgsConstructor;
-import org.sportstogo.backend.Models.Location;
 import org.sportstogo.backend.Enums.Sport;
+import org.sportstogo.backend.Models.Image;
+import org.sportstogo.backend.Models.Location;
+import org.sportstogo.backend.Models.LocationImage;
+import org.sportstogo.backend.Repository.LocationImageRepository;
 import org.sportstogo.backend.Repository.LocationRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-/**
- * Service class for managing {@link Location} entities and related operations
- */
 @Service
 @AllArgsConstructor
 public class LocationService {
-    private LocationRepository locationRepository;
 
-    /**
-     * Retrieves all the locations from the database
-     *
-     * @return a list of all locations
-     */
+    private final LocationRepository locationRepository;
+    private final LocationImageRepository locationImageRepository;
+    private final ImageService imageService;
+
+    @Transactional(readOnly = true)
     public List<Location> getLocations() {
         return locationRepository.findAll();
     }
 
-    /**
-     * Retrieves all locations matching a filter
-     *
-     * @return a list of all verified locations matching the filter
-     */
     public List<Location> getFiltered(Sport sport, LocalTime openingTime,
                                       LocalTime closingTime, String priceOrder) {
         return locationRepository.findAll().stream()
                 .filter(location -> {
                     boolean matchesSport = (sport == null || location.getSport() == sport);
-
                     LocalTime locClosing = location.getClosingTime().equals(LocalTime.MIDNIGHT)
                             ? LocalTime.of(23, 59)
                             : location.getClosingTime();
-
                     boolean matchesTime = true;
-
-                    if (openingTime != null) {
+                    if (openingTime != null)
                         matchesTime &= location.getOpeningTime().compareTo(openingTime) <= 0;
-                    }
-
-                    if (closingTime != null) {
+                    if (closingTime != null)
                         matchesTime &= locClosing.compareTo(closingTime) >= 0;
-                    }
-
                     return matchesSport && matchesTime;
                 })
                 .sorted((l1, l2) -> {
@@ -64,22 +51,14 @@ public class LocationService {
                         return Double.compare(l1.getHourlyRate(), l2.getHourlyRate());
                     } else if ("descending".equalsIgnoreCase(priceOrder)) {
                         return Double.compare(l2.getHourlyRate(), l1.getHourlyRate());
-                    } else {
-                        return 0;
                     }
+                    return 0;
                 })
                 .toList();
     }
 
-
-    /**
-     * Adds a new location to the database
-     *
-     * @param location the location object from the request body
-     * @return HTTP CREATED if successful, HTTP CONFLICT otherwise
-     */
     public ResponseEntity<String> addNewLocation(Location location) {
-        if (this.locationRepository.findByName(location.getName()).isPresent()) {
+        if (locationRepository.findByName(location.getName()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("The location already exists");
         }
         if (location.getClosingTime().equals(LocalTime.MIDNIGHT)) {
@@ -87,31 +66,10 @@ public class LocationService {
         }
         location.setCreatedAt(LocalDate.now());
         location.setVerified(false);
-        this.locationRepository.save(location);
+        locationRepository.save(location);
         return ResponseEntity.status(HttpStatus.CREATED).body("Location successfully added");
     }
 
-    /**
-     * Deletes a location by its ID
-     *
-     * @param id the ID of the location to be removed
-     * @return HTTP OK if successful, HTTP CONFLICT otherwise
-     */
-    public ResponseEntity<String> deleteById(Long id) {
-        if (locationRepository.findById(id).isEmpty()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Location not found");
-        }
-        locationRepository.deleteById(id);
-        return ResponseEntity.status(HttpStatus.OK).body("Location successfully deleted");
-    }
-
-    /**
-     * Updates the name of an existing location
-     *
-     * @param id   the id of the location whose name is to be changed
-     * @param name the new name of the location
-     * @return HTTP OK if successful, HTTP CONFLICT otherwise
-     */
     @Transactional
     public ResponseEntity<String> updateLocation(Long id, String name) {
         Optional<Location> locationOp = locationRepository.findById(id);
@@ -123,23 +81,101 @@ public class LocationService {
         return ResponseEntity.status(HttpStatus.OK).body("Location successfully updated");
     }
 
-    /**
-     * Fetches the name of a location by its ID.
-     *
-     * @param id the ID of the location
-     * @return the location’s name
-     * @throws IllegalArgumentException if no location with the given ID exists
-     */
     public String getLocationNameById(Long id) {
         return locationRepository.findById(id)
                 .map(Location::getName)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Location with id " + id + " not found")
-                );
-
+                .orElseThrow(() -> new IllegalArgumentException("Location with id " + id + " not found"));
     }
 
-    public List<Location> getLocationByUserId(String uID){
-      return this.locationRepository.findAllByCreatedBy(uID);
+    @Transactional(readOnly = true)
+    public List<Location> getLocationByUserId(String uID) {
+        return locationRepository.findAllByCreatedBy(uID);
     }
+
+    @Transactional
+    public LocationDTO addLocationWithImages(Location location, List<MultipartFile> images) {
+        if (images.size() > 10) {
+            throw new IllegalArgumentException("Maximum 10 images allowed.");
+        }
+
+        location.setCreatedAt(LocalDate.now());
+        location.setVerified(false);
+        Location savedLocation = locationRepository.save(location);
+
+        for (MultipartFile file : images) {
+            Image savedImage = imageService.saveImage(file);
+            LocationImage locationImage = new LocationImage();
+            locationImage.setLocation(savedLocation);
+            locationImage.setImage(savedImage);
+            locationImageRepository.save(locationImage);
+        }
+
+        // Initialize lazy collection before DTO mapping
+        savedLocation.getImages().size();
+
+        return Location.mapToDTO(savedLocation);
+    }
+
+    @Transactional
+    public ResponseEntity<String> deleteById(Long id) {
+        Optional<Location> locationOpt = locationRepository.findById(id);
+        if (locationOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Location not found");
+        }
+
+        Location location = locationOpt.get();
+
+        // Delete associated images and their mappings
+        location.getImages().forEach(locationImage -> {
+            Image image = locationImage.getImage();
+
+            // Delete the join table entry
+            locationImageRepository.delete(locationImage);
+
+            // Delete the actual image (from DB and S3)
+            imageService.deleteImageEntity(image);
+        });
+
+        // Finally delete the location
+        locationRepository.delete(location);
+
+        return ResponseEntity.ok("Location successfully deleted");
+    }
+
+
+
+
+    @Transactional(readOnly = true)
+    public List<LocationDTO> getAllLocationDTOs() {
+        List<Location> locations = locationRepository.findAll();
+
+        // Force loading of lazy collections before mapping
+        locations.forEach(loc -> loc.getImages().size());
+
+        return locations.stream()
+                .map(Location::mapToDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<LocationDTO> getLocationDTOsByUserId(String uid) {
+        List<Location> locations = locationRepository.findAllByCreatedBy(uid);
+
+        locations.forEach(loc -> loc.getImages().size());
+
+        return locations.stream()
+                .map(Location::mapToDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Location getLocationById(Long id) {
+        return locationRepository.findById(id)
+                .map(location -> {
+                    location.getImages().size(); // <-- force loading lazy collection
+                    return location;
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
+    }
+
 }
