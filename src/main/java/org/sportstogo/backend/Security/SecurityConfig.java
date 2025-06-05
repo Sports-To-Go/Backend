@@ -47,7 +47,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Allow the frontend origin
+        configuration.setAllowedOrigins(List.of("https://sports-to-go.netlify.app")); // Allow the frontend origin
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Added OPTIONS
         configuration.setAllowedHeaders(List.of("*")); // Allow all headers for WebSocket
         configuration.setAllowCredentials(true); // Allow cookies or credentials
