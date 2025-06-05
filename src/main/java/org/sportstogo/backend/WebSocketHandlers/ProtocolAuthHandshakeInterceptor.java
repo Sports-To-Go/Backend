@@ -17,7 +17,7 @@ public class ProtocolAuthHandshakeInterceptor implements HandshakeInterceptor {
         String origin = request.getHeaders().getOrigin();
 //        System.out.printf("Handshake Origin: {}\n", origin);
 
-        if (!"http://localhost:5173".equals(origin)) {
+        if (!"https://sports-to-go.netlify.app".equals(origin)) {
 //            System.out.printf("Origin {} not allowed\n", origin);
             return false; // Reject connection
         }
