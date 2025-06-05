@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.sportstogo.backend.DTOs.NameDTO;
 import org.sportstogo.backend.DTOs.ReportDTO;
 
+import org.sportstogo.backend.DTOs.ReportWithUserDTO;
 import org.sportstogo.backend.Enums.ReportStatus;
 import org.sportstogo.backend.Enums.ReportTargetType;
 
@@ -202,19 +203,56 @@ public class AdminController {
     }
 
     @GetMapping(path = "/reports/targetUser/{targetId}")
-    public ResponseEntity<List<Report>> getReportsForTargetUser(@PathVariable String targetId, Authentication authentication) {
+    public ResponseEntity<List<ReportWithUserDTO>> getReportsForTargetUser(
+            @PathVariable String targetId,
+            Authentication authentication) {
+
         String authenticatedUid = (String) authentication.getPrincipal();
 
         if (!authenticatedUid.equals(targetId)) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN); 
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         List<Report> reports = reportService.getReportsByTargetIdAndType(targetId, ReportTargetType.User);
+
         if (reports.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
-        return ResponseEntity.ok(reports);
+
+        List<ReportWithUserDTO> enrichedReports = reports.stream().map(report -> {
+            String imageUrl = null;
+            try {
+                var reporter = userService.getUserById(report.getReportedBy());
+
+                if (reporter.getImage() != null) {
+                    imageUrl = reporter.getImage().getUrl();
+                }
+
+                return new ReportWithUserDTO(
+                        report.getId(),
+                        report.getReason(),
+                        report.getCreatedAt(),
+                        reporter.getDisplayName(),
+                        report.getTargetId(),
+                        report.getTargetType().name(),
+                        imageUrl
+                );
+            } catch (Exception ignored) {
+                return new ReportWithUserDTO(
+                        report.getId(),
+                        report.getReason(),
+                        report.getCreatedAt(),
+                        report.getReportedBy(),
+                        report.getTargetId(),
+                        report.getTargetType().name(),
+                        null
+                );
+            }
+        }).toList();
+
+        return ResponseEntity.ok(enrichedReports);
     }
+
 
     @GetMapping(path = "reports/info")
     public ResponseEntity<List<ReportInfoDTO>> getReportInfo(Authentication authentication) {
@@ -301,16 +339,25 @@ public class AdminController {
         List<ReportDTO> dtos = reportService.getReports().stream()
                 .filter(r -> r.getTargetType().name().equalsIgnoreCase(reportType))
                 .filter(r -> r.getTargetId().equals(targetId))
-                .map(r -> new ReportDTO(
-                        r.getReportedBy(),
-                        r.getReason(),
-                        r.getCreatedAt()
-                ))
+                .map(r -> {
+                    String displayName;
+                    try {
+                        displayName = userService.getUserByUid(r.getReportedBy()).getDisplayName();
+                    } catch (Exception e) {
+                        displayName = "Unknown User";
+                    }
+
+                    return new ReportDTO(
+                            displayName,
+                            r.getReason(),
+                            r.getCreatedAt()
+                    );
+                })
                 .collect(Collectors.toList());
 
-        // Always return 200 OK with list (empty if no matches)
         return ResponseEntity.ok(dtos);
     }
+
 
     /**
      * @param report the Report object to be added; must contain reportedBy, targetType, targetId, reason, and status
